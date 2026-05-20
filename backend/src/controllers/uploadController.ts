@@ -80,7 +80,7 @@ export const parseFile = async (req: AuthRequest, res: Response): Promise<void> 
     } else if (isNumbers) {
       if (process.env.NODE_ENV === 'production') {
         res.status(400).json({
-          message: 'Apple Numbers (.numbers) format is not supported in the production environment. Please export your sheet as CSV or Excel (XLSX) format and try again.'
+          message: 'Please export Apple Numbers file as CSV or Excel before uploading.'
         });
         return;
       }

@@ -1,54 +1,13 @@
-import express, { Request, Response, NextFunction } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
+import app from './app';
 import { connectDB } from './config/db';
-import apiRouter from './routes/index';
 import User from './models/User';
 
 // Load Env variables
 dotenv.config();
 
-const app = express();
 const PORT = process.env.PORT || 5001;
-
-// Security Middlewares
-app.use(helmet());
-
-// CORS configuration
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-app.use(cors({
-  origin: [clientUrl, 'http://localhost:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
-
-// Request logger
-app.use(morgan('dev'));
-
-// Body Parsers
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Health Check
-app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'OK', timestamp: new Date() });
-});
-
-// Mount API routes
-app.use('/api', apiRouter);
-
-// Global Error Handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error('Unhandled Server Error:', err);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
-  });
-});
 
 // Seed default users if empty
 const seedDefaultUsers = async () => {
@@ -106,14 +65,9 @@ const startServer = async () => {
   await connectDB();
   await seedDefaultUsers();
   
-  if (!process.env.VERCEL) {
-    app.listen(PORT, () => {
-      console.log(`🚀 SatikFlow CRM API server is running on port ${PORT}`);
-      console.log(`👉 Client origin allowed: ${clientUrl}`);
-    });
-  }
+  app.listen(PORT, () => {
+    console.log(`🚀 SatikFlow CRM API server is running on port ${PORT}`);
+  });
 };
 
 startServer();
-
-export default app;
