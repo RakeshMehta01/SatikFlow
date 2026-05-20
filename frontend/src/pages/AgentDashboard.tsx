@@ -76,7 +76,7 @@ export const AgentDashboard: React.FC = () => {
         <div className="relative z-10 space-y-4 max-w-xl text-left">
           <div className="inline-flex items-center space-x-1.5 bg-brand-purple/30 border border-brand-purple/40 text-brand-purple-light text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Calling Agent Workspace</span>
+            <span>Workspace</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Your Dialing Cockpit</h2>
           <p className="text-slate-300 text-sm leading-relaxed">
