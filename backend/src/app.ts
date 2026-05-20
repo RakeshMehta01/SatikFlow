@@ -12,12 +12,19 @@ app.use(helmet());
 // CORS configuration
 const clientUrl = process.env.CLIENT_URL;
 const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000', 'https://satikflow.vercel.app'];
+if (clientUrl) {
+  allowedOrigins.push(clientUrl);
+}
 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps, curl, or serverless warmups)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+    
+    // Check if origin is a local address or explicitly allowed
+    const isLocal = origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
+    
+    if (isLocal || allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.some(allowed => origin.startsWith(allowed))) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
