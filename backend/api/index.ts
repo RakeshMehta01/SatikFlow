@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import serverless from 'serverless-http';
 import app from '../src/app';
 import { connectDB } from '../src/config/db';
 
@@ -12,7 +11,7 @@ export default async function handler(req: any, res: any) {
       isConnected = true;
     }
     
-    return serverless(app)(req, res);
+    return app(req, res);
   } catch (error: any) {
     console.error('Vercel API Handler Error:', error);
     res.status(500).json({
