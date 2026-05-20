@@ -21,27 +21,23 @@ This guide details the step-by-step instructions required to deploy the **SatikF
 
 ---
 
-## 3. Backend Deployment: Render
-1.  Create an account at [Render](https://render.com).
-2.  Click **New +** and select **Web Service**.
+## 3. Backend Deployment: Vercel
+1.  Log in to [Vercel](https://vercel.com).
+2.  Click **Add New** and select **Project**.
 3.  Connect your GitHub repository containing the SatikFlow CRM project.
-4.  Configure the service details:
-    *   **Name**: `satikflow-backend`
+4.  Configure the project settings:
+    *   **Framework Preset**: `Other` (Vercel automatically detects the node configuration via `backend/vercel.json`)
     *   **Root Directory**: `backend`
-    *   **Runtime**: `Node`
-    *   **Build Command**: `npm install && npm run build`
-    *   **Start Command**: `node dist/index.js`
-5.  Scroll to **Advanced** and click **Add Environment Variable**. Configure these production variables:
+5.  Open the **Environment Variables** section and configure these production variables:
 
 | Key | Example Value | Description |
 | :--- | :--- | :--- |
 | `NODE_ENV` | `production` | Enforces production-optimized builds and restricts local-only features |
-| `PORT` | `10000` (assigned automatically) | Render defaults to port 10000 |
 | `MONGO_URI` | `mongodb+srv://.../satikflow-crm` | Connection string obtained from MongoDB Atlas |
 | `JWT_SECRET` | `your_custom_long_production_random_jwt_secret` | Secure signing key for user authentication tokens |
-| `CLIENT_URL` | `https://satikflow-crm.vercel.app` | Production URL of the Vercel frontend |
+| `CLIENT_URL` | `https://satikflow-frontend.vercel.app` | Production URL of the Vercel frontend |
 
-6.  Deploy the web service and copy the generated live backend URL (e.g. `https://satikflow-backend.onrender.com`).
+6.  Click **Deploy**. Copy the generated live backend API URL (e.g., `https://satikflow-backend.vercel.app`).
 
 ---
 
@@ -58,9 +54,9 @@ This guide details the step-by-step instructions required to deploy the **SatikF
 
 | Key | Value | Description |
 | :--- | :--- | :--- |
-| `VITE_API_BASE_URL` | `https://satikflow-backend.onrender.com/api` | The live URL of the Render backend + `/api` |
+| `VITE_API_BASE_URL` | `https://satikflow-backend.vercel.app/api` | The live URL of the Vercel backend + `/api` |
 
-6.  Click **Deploy**. Once successfully deployed, copy the live frontend URL and update the `CLIENT_URL` variable in your Render backend settings.
+6.  Click **Deploy**. Once successfully deployed, copy the live frontend URL and update the `CLIENT_URL` variable in your Vercel backend project settings.
 
 ---
 
