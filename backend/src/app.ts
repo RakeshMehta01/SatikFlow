@@ -11,10 +11,7 @@ app.use(helmet());
 
 // CORS configuration
 const clientUrl = process.env.CLIENT_URL;
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'];
-if (clientUrl) {
-  allowedOrigins.push(clientUrl);
-}
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000', 'https://satikflow.vercel.app'];
 
 app.use(cors({
   origin: (origin, callback) => {
