@@ -103,7 +103,7 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
 export const toggleUserStatus = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status } = req.body || {};
 
     if (!status || !['ACTIVE', 'INACTIVE'].includes(status)) {
       res.status(400).json({ message: 'Valid status (ACTIVE or INACTIVE) is required' });

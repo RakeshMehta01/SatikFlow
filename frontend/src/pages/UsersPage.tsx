@@ -118,7 +118,8 @@ export const UsersPage: React.FC = () => {
     setSuccessMsg(null);
     
     try {
-      const res = await api.patch(`/users/${user._id}/status`);
+      const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      const res = await api.patch(`/users/${user._id}/status`, { status: newStatus });
       const updatedUser = res.data;
       
       setSuccessMsg(`Agent status set to: ${updatedUser.status} for ${user.name}`);
