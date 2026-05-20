@@ -106,10 +106,14 @@ const startServer = async () => {
   await connectDB();
   await seedDefaultUsers();
   
-  app.listen(PORT, () => {
-    console.log(`🚀 SatikFlow CRM API server is running on port ${PORT}`);
-    console.log(`👉 Client origin allowed: ${clientUrl}`);
-  });
+  if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+      console.log(`🚀 SatikFlow CRM API server is running on port ${PORT}`);
+      console.log(`👉 Client origin allowed: ${clientUrl}`);
+    });
+  }
 };
 
 startServer();
+
+export default app;
