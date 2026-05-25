@@ -12,6 +12,7 @@ import {
   Edit2,
   CheckSquare
 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 interface Lead {
   _id: string;
@@ -39,6 +40,7 @@ interface Lead {
 }
 
 export const CallingWorkspace: React.FC = () => {
+  usePageTitle('Calling Workspace');
   const [queue, setQueue] = useState<Lead[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);

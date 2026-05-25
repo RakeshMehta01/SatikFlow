@@ -15,8 +15,10 @@ import {
   TrendingUp,
   AlertTriangle
 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 export const LandingPage: React.FC = () => {
+  usePageTitle('For Modern Sales Team');
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   const toggleFaq = (index: number) => {
@@ -57,12 +59,15 @@ export const LandingPage: React.FC = () => {
         <nav className="w-full max-w-6xl bg-navy-950/70 backdrop-blur-xl border border-navy-800/80 rounded-full shadow-xl shadow-navy-950/40 px-6 py-2.5 flex items-center justify-between transition-all duration-300">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2.5 group">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-purple via-indigo-600 to-purple-500 flex items-center justify-center font-bold text-white shadow-md shadow-brand-purple/25 ring-2 ring-white/10 animate-logo-pulse animate-gradient-shift group-hover:scale-105 transition-transform duration-200">
-              <svg className="w-5 h-5 text-white group-hover:animate-phone-ring" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M8.5 5.5A4 4 0 0 1 12 4a4 4 0 0 1 4 4c0 3-8 3-8 6a4 4 0 0 0 4 4 4 4 0 0 0 3.5-1.5" />
-                <circle cx="8.5" cy="5.5" r="1.5" fill="currentColor" />
-                <circle cx="15.5" cy="18.5" r="1.5" fill="currentColor" />
-              </svg>
+            <div className="relative">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-purple via-indigo-600 to-purple-500 flex items-center justify-center font-bold text-white shadow-md shadow-brand-purple/25 ring-2 ring-white/10 animate-logo-pulse animate-gradient-shift group-hover:scale-105 transition-transform duration-200">
+                <svg className="w-5 h-5 text-white group-hover:animate-phone-ring" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8.5 5.5A4 4 0 0 1 12 4a4 4 0 0 1 4 4c0 3-8 3-8 6a4 4 0 0 0 4 4 4 4 0 0 0 3.5-1.5" />
+                  <circle cx="8.5" cy="5.5" r="1.5" fill="currentColor" />
+                  <circle cx="15.5" cy="18.5" r="1.5" fill="currentColor" />
+                </svg>
+              </div>
+              <span className="absolute -top-1.5 -right-1.5 text-[7px] font-black uppercase tracking-wide bg-gradient-to-r from-pink-500 to-rose-500 text-white px-1.5 py-0.5 rounded-full leading-none shadow-sm">beta</span>
             </div>
             <div className="flex items-center">
               <span className="font-extrabold text-lg text-white tracking-tight group-hover:text-brand-purple-light transition-colors duration-200">
@@ -87,13 +92,13 @@ export const LandingPage: React.FC = () => {
           <div className="flex items-center space-x-3">
             <Link
               to="/login"
-              className="text-slate-300 hover:text-white text-xs font-bold uppercase tracking-wider px-4 py-2 hover:bg-white/5 rounded-full transition-all duration-150 min-h-[38px] flex items-center"
+              className="hidden sm:flex text-slate-300 hover:text-white text-xs font-bold uppercase tracking-wider px-4 py-2 hover:bg-white/5 rounded-full transition-all duration-150 min-h-[38px] items-center"
             >
               Login
             </Link>
             <Link
               to="/login"
-              className="bg-brand-purple hover:bg-brand-purple-hover text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-full shadow-lg shadow-brand-purple/20 hover:shadow-brand-purple/35 transition-all duration-150 min-h-[38px] flex items-center"
+              className="bg-brand-purple hover:bg-brand-purple-hover text-white font-bold uppercase tracking-wider rounded-full shadow-lg shadow-brand-purple/20 hover:shadow-brand-purple/35 transition-all duration-150 flex items-center text-[10px] px-3 py-1.5 sm:text-xs sm:px-5 sm:py-2.5 sm:min-h-[38px]"
             >
               Get Started
             </Link>
@@ -112,16 +117,16 @@ export const LandingPage: React.FC = () => {
           {/* Badge */}
           <div className="inline-flex items-center space-x-2 bg-brand-purple/20 border border-brand-purple/45 text-brand-purple-light text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-wider animate-pulse">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Built for Modern Sales Teams</span>
+            <span>Built for Modern Sales Team</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6 max-w-4xl mx-auto text-white">
-            Turn GMB leads into <br className="hidden sm:inline" />
+            Turn LEADS into <br className="hidden sm:inline" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-purple-light via-purple-300 to-pink-300">real sales conversations.</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto mb-10 font-normal leading-relaxed">
-            Upload flexible Google My Business lead data, assign it to your calling team, track every call, and never miss a follow-up.
+            Upload flexible leads, assign it to your calling team, track every call and never miss a follow-up.
           </p>
 
           {/* Action buttons */}
@@ -151,7 +156,7 @@ export const LandingPage: React.FC = () => {
                   <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
-                <div className="text-xs text-slate-500 font-medium font-mono">satikflow-crm.app/dashboard</div>
+                <div className="text-xs text-slate-500 font-medium font-mono">satikflow/dashboard</div>
                 <div className="w-4"></div>
               </div>
               {/* Mockup body */}
@@ -439,7 +444,7 @@ export const LandingPage: React.FC = () => {
             <span className="text-xs font-bold text-pink-600 uppercase tracking-widest block">For CRM Managers</span>
             <h2 className="text-3xl font-extrabold text-slate-900">Lead management with full oversight</h2>
             <p className="text-slate-500">
-              Say goodbye to tracking dials via messaging threads. SatikFlow CRM lets managers inspect operations at a high level.
+              Say goodbye to tracking dials via messaging threads. SatikFlow lets managers inspect operations at a high level.
             </p>
             <ul className="space-y-3.5 text-sm text-slate-600">
               <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2.5 text-pink-500" /> Upload flexible, custom files without rejection</li>
@@ -450,18 +455,18 @@ export const LandingPage: React.FC = () => {
           </div>
           <div className="bg-pink-50/60 p-8 rounded-[12px] border border-pink-100 flex items-center justify-center">
             <div className="bg-white p-6 rounded-[12px] border border-slate-200 shadow-md w-full max-w-md space-y-4">
-              <h4 className="font-bold text-slate-900">Manage Agents</h4>
+              <h4 className="font-bold text-slate-900">Manage Team</h4>
               <div className="divide-y divide-slate-100">
                 <div className="py-2.5 flex justify-between items-center">
                   <div>
-                    <p className="text-xs font-bold text-slate-900">Calling Agent Alice</p>
+                    <p className="text-xs font-bold text-slate-900">Calling Team Alice</p>
                     <p className="text-[10px] text-slate-500">Active • 42 calls today</p>
                   </div>
                   <span className="bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded font-bold">ACTIVE</span>
                 </div>
                 <div className="py-2.5 flex justify-between items-center">
                   <div>
-                    <p className="text-xs font-bold text-slate-900">Agent Bob Smith</p>
+                    <p className="text-xs font-bold text-slate-900">Agent Team Smith</p>
                     <p className="text-[10px] text-slate-500">Active • 28 calls today</p>
                   </div>
                   <span className="bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded font-bold">ACTIVE</span>
@@ -573,12 +578,15 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-brand-purple to-purple-500 flex items-center justify-center font-bold text-white shadow-md ring-1 ring-white/10 animate-logo-pulse animate-gradient-shift">
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8.5 5.5A4 4 0 0 1 12 4a4 4 0 0 1 4 4c0 3-8 3-8 6a4 4 0 0 0 4 4 4 4 0 0 0 3.5-1.5" />
-                  <circle cx="8.5" cy="5.5" r="1.5" fill="currentColor" />
-                  <circle cx="15.5" cy="18.5" r="1.5" fill="currentColor" />
-                </svg>
+              <div className="relative">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-brand-purple to-purple-500 flex items-center justify-center font-bold text-white shadow-md ring-1 ring-white/10 animate-logo-pulse animate-gradient-shift">
+                  <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M8.5 5.5A4 4 0 0 1 12 4a4 4 0 0 1 4 4c0 3-8 3-8 6a4 4 0 0 0 4 4 4 4 0 0 0 3.5-1.5" />
+                    <circle cx="8.5" cy="5.5" r="1.5" fill="currentColor" />
+                    <circle cx="15.5" cy="18.5" r="1.5" fill="currentColor" />
+                  </svg>
+                </div>
+                <span className="absolute -top-1.5 -right-1.5 text-[7px] font-black uppercase tracking-wide bg-gradient-to-r from-pink-500 to-rose-500 text-white px-1.5 py-0.5 rounded-full leading-none shadow-sm">beta</span>
               </div>
               <span className="font-semibold text-slate-200">SatikFlow CRM</span>
             </div>

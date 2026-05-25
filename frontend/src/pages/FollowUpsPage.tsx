@@ -10,6 +10,7 @@ import {
   CheckCircle,
   Layers
 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 interface Lead {
   _id: string;
@@ -33,6 +34,7 @@ interface Agent {
 }
 
 export const FollowUpsPage: React.FC = () => {
+  usePageTitle('Follow-Ups');
   const { user } = useAuth();
 
   // Agent States: split lists

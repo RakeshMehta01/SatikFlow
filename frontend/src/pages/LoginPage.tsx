@@ -3,8 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { Lock, Mail, ArrowLeft, AlertCircle, ShieldCheck, Sparkles } from 'lucide-react';
+import Swal from 'sweetalert2';
+import usePageTitle from '../hooks/usePageTitle';
 
 export const LoginPage: React.FC = () => {
+  usePageTitle('Sign In');
   const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
@@ -34,9 +37,9 @@ export const LoginPage: React.FC = () => {
     try {
       const response = await api.post('/auth/login', { email, password });
       const { token, user: loggedUser } = response.data;
-      
+
       login(token, loggedUser);
-      
+
       // Navigate to corresponding dashboard
       const destination = loggedUser.role === 'MANAGER' ? '/manager/dashboard' : '/agent/dashboard';
       navigate(destination, { replace: true });
@@ -50,6 +53,28 @@ export const LoginPage: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleForgotPassword = () => {
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'info',
+      title: 'Contact your Admin / Manager',
+      text: 'Ask them to reset your password.',
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true,
+      background: 'transparent',
+      iconColor: '#a78bfa',
+      customClass: {
+        popup: 'swal-glass-toast',
+      },
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      }
+    });
   };
 
   return (
@@ -67,14 +92,17 @@ export const LoginPage: React.FC = () => {
       <div className="hidden lg:flex lg:w-1/2 bg-navy-950 text-white relative overflow-hidden flex-col justify-between p-12">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-25"></div>
         <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-brand-purple/20 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-        
+
         <Link to="/" className="flex items-center space-x-2.5 group z-10">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-purple via-indigo-600 to-purple-500 flex items-center justify-center font-bold text-white shadow-md shadow-brand-purple/25 ring-2 ring-white/10 animate-logo-pulse animate-gradient-shift group-hover:scale-105 transition-transform duration-200">
-            <svg className="w-5 h-5 text-white group-hover:animate-phone-ring" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M8.5 5.5A4 4 0 0 1 12 4a4 4 0 0 1 4 4c0 3-8 3-8 6a4 4 0 0 0 4 4 4 4 0 0 0 3.5-1.5" />
-              <circle cx="8.5" cy="5.5" r="1.5" fill="currentColor" />
-              <circle cx="15.5" cy="18.5" r="1.5" fill="currentColor" />
-            </svg>
+          <div className="relative">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-purple via-indigo-600 to-purple-500 flex items-center justify-center font-bold text-white shadow-md shadow-brand-purple/25 ring-2 ring-white/10 animate-logo-pulse animate-gradient-shift group-hover:scale-105 transition-transform duration-200">
+              <svg className="w-5 h-5 text-white group-hover:animate-phone-ring" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8.5 5.5A4 4 0 0 1 12 4a4 4 0 0 1 4 4c0 3-8 3-8 6a4 4 0 0 0 4 4 4 4 0 0 0 3.5-1.5" />
+                <circle cx="8.5" cy="5.5" r="1.5" fill="currentColor" />
+                <circle cx="15.5" cy="18.5" r="1.5" fill="currentColor" />
+              </svg>
+            </div>
+            <span className="absolute -top-1.5 -right-1.5 text-[7px] font-black uppercase tracking-wide bg-gradient-to-r from-pink-500 to-rose-500 text-white px-1.5 py-0.5 rounded-full leading-none shadow-sm">beta</span>
           </div>
           <div className="flex items-center">
             <span className="font-extrabold text-lg text-white tracking-tight group-hover:text-brand-purple-light transition-colors duration-200">
@@ -98,7 +126,7 @@ export const LoginPage: React.FC = () => {
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
             Assign custom spreadsheet data, follow-up calls due, track converted prospects, and inspect live reports with zero setup time.
           </p>
- 
+
           {/* Mini Dashboard Illustration */}
           <div className="bg-slate-900/60 backdrop-blur-md rounded-[12px] border border-slate-800 p-4 space-y-3 shadow-2xl">
             <div className="flex justify-between items-center text-xs">
@@ -107,20 +135,20 @@ export const LoginPage: React.FC = () => {
             </div>
             <div className="space-y-2 text-xs">
               <div className="p-2.5 bg-slate-950/40 rounded-lg border border-slate-850 flex justify-between">
-                <span className="text-slate-300">Agent Alice logged call callback</span>
+                <span className="text-slate-300">Team Anjali logged call callback</span>
                 <span className="text-slate-500">2 mins ago</span>
               </div>
               <div className="p-2.5 bg-slate-950/40 rounded-lg border border-slate-850 flex justify-between">
-                <span className="text-slate-300">Manager uploaded 120 GMB leads</span>
+                <span className="text-slate-300">Manager uploaded 120 Leads</span>
                 <span className="text-slate-500">10 mins ago</span>
               </div>
             </div>
           </div>
         </div>
- 
+
         {/* Footer */}
         <div className="z-10 text-xs text-slate-500 font-mono">
-          © {new Date().getFullYear()} SatikFlow CRM. Secure Node-JWT session.
+          © {new Date().getFullYear()} SatikFlow CRM. All rights reserved. Designed with ❤️ in India.
         </div>
       </div>
 
@@ -169,7 +197,7 @@ export const LoginPage: React.FC = () => {
                 <label htmlFor="password" className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Password
                 </label>
-                <span className="text-xs text-brand-purple hover:underline cursor-pointer">
+                <span onClick={handleForgotPassword} className="text-xs text-brand-purple hover:underline cursor-pointer">
                   Forgot Password?
                 </span>
               </div>

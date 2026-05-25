@@ -8,6 +8,7 @@ import {
   Users,
   Layers
 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 interface Agent {
   id: string;
@@ -36,6 +37,7 @@ interface Lead {
 }
 
 export const AssignLeadsPage: React.FC = () => {
+  usePageTitle('Assign Leads');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);

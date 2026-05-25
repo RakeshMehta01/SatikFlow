@@ -15,6 +15,7 @@ import {
   Edit3,
   UserCheck
 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 interface Lead {
   _id: string;
@@ -63,6 +64,7 @@ interface Activity {
 }
 
 export const LeadDetailPage: React.FC = () => {
+  usePageTitle('Lead Detail');
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
 

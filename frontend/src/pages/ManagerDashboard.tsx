@@ -12,6 +12,7 @@ import {
   UserCheck
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import usePageTitle from '../hooks/usePageTitle';
 
 interface AgentPerformance {
   agentId: string;
@@ -37,6 +38,7 @@ interface DashboardStats {
 }
 
 export const ManagerDashboard: React.FC = () => {
+  usePageTitle('Manager Dashboard');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

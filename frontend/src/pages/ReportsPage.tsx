@@ -15,6 +15,7 @@ import {
   Layers,
   AlertCircle
 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 interface ManagerReportStats {
   leadsByStatus: Record<string, number>;
@@ -43,6 +44,7 @@ interface AgentReportStats {
 }
 
 export const ReportsPage: React.FC = () => {
+  usePageTitle('Reports');
   const { user } = useAuth();
   const [managerData, setManagerData] = useState<ManagerReportStats | null>(null);
   const [agentData, setAgentData] = useState<AgentReportStats | null>(null);

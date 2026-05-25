@@ -10,6 +10,7 @@ import {
   Table,
   Check
 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 interface UploadHistoryItem {
   _id: string;
@@ -27,6 +28,7 @@ interface UploadHistoryItem {
 }
 
 export const UploadLeadsPage: React.FC = () => {
+  usePageTitle('Upload Leads');
   // Wizard steps: 1: File selection, 2: Column mapping, 3: Import processing/results
   const [step, setStep] = useState(1);
   const [sourceType, setSourceType] = useState<'GMB' | 'EXCEL' | 'CSV' | 'NUMBERS' | 'MANUAL'>('GMB');

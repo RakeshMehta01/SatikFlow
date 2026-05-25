@@ -9,6 +9,7 @@ import {
   AlertCircle,
   Plus
 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 interface Lead {
   _id: string;
@@ -37,6 +38,7 @@ interface Agent {
 }
 
 export const LeadListPage: React.FC = () => {
+  usePageTitle('Leads');
   const { user } = useAuth();
 
   const [leads, setLeads] = useState<Lead[]>([]);

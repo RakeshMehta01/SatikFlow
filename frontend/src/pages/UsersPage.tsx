@@ -12,6 +12,7 @@ import {
   Phone,
   Lock
 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 interface AgentUser {
   _id: string;
@@ -24,6 +25,7 @@ interface AgentUser {
 }
 
 export const UsersPage: React.FC = () => {
+  usePageTitle('Users & Agents');
   const [users, setUsers] = useState<AgentUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);

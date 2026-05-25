@@ -68,12 +68,15 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
         {/* Brand Header */}
         <div className="h-16 flex items-center px-6 border-b border-navy-900 justify-between flex-shrink-0">
           <Link to="/" className="flex items-center space-x-2.5 group">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-purple via-indigo-600 to-purple-500 flex items-center justify-center font-bold text-white shadow-md shadow-brand-purple/25 ring-2 ring-white/10 animate-logo-pulse animate-gradient-shift group-hover:scale-105 transition-transform duration-200">
-              <svg className="w-5 h-5 text-white group-hover:animate-phone-ring" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M8.5 5.5A4 4 0 0 1 12 4a4 4 0 0 1 4 4c0 3-8 3-8 6a4 4 0 0 0 4 4 4 4 0 0 0 3.5-1.5" />
-                <circle cx="8.5" cy="5.5" r="1.5" fill="currentColor" />
-                <circle cx="15.5" cy="18.5" r="1.5" fill="currentColor" />
-              </svg>
+            <div className="relative">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-purple via-indigo-600 to-purple-500 flex items-center justify-center font-bold text-white shadow-md shadow-brand-purple/25 ring-2 ring-white/10 animate-logo-pulse animate-gradient-shift group-hover:scale-105 transition-transform duration-200">
+                <svg className="w-5 h-5 text-white group-hover:animate-phone-ring" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8.5 5.5A4 4 0 0 1 12 4a4 4 0 0 1 4 4c0 3-8 3-8 6a4 4 0 0 0 4 4 4 4 0 0 0 3.5-1.5" />
+                  <circle cx="8.5" cy="5.5" r="1.5" fill="currentColor" />
+                  <circle cx="15.5" cy="18.5" r="1.5" fill="currentColor" />
+                </svg>
+              </div>
+              <span className="absolute -top-1.5 -right-1.5 text-[7px] font-black uppercase tracking-wide bg-gradient-to-r from-pink-500 to-rose-500 text-white px-1.5 py-0.5 rounded-full leading-none shadow-sm">beta</span>
             </div>
             <div className="flex items-center">
               <span className="font-extrabold text-lg text-white tracking-tight group-hover:text-brand-purple-light transition-colors duration-200">
@@ -218,12 +221,15 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             {/* Close Button */}
             <div className="h-16 flex items-center justify-between px-6 border-b border-navy-900">
               <div className="flex items-center space-x-2.5">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-purple via-indigo-600 to-purple-500 flex items-center justify-center font-bold text-white shadow-md ring-2 ring-white/10 animate-logo-pulse animate-gradient-shift">
-                  <svg className="w-5 h-5 text-white animate-phone-ring" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M8.5 5.5A4 4 0 0 1 12 4a4 4 0 0 1 4 4c0 3-8 3-8 6a4 4 0 0 0 4 4 4 4 0 0 0 3.5-1.5" />
-                    <circle cx="8.5" cy="5.5" r="1.5" fill="currentColor" />
-                    <circle cx="15.5" cy="18.5" r="1.5" fill="currentColor" />
-                  </svg>
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-purple via-indigo-600 to-purple-500 flex items-center justify-center font-bold text-white shadow-md ring-2 ring-white/10 animate-logo-pulse animate-gradient-shift">
+                    <svg className="w-5 h-5 text-white animate-phone-ring" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8.5 5.5A4 4 0 0 1 12 4a4 4 0 0 1 4 4c0 3-8 3-8 6a4 4 0 0 0 4 4 4 4 0 0 0 3.5-1.5" />
+                      <circle cx="8.5" cy="5.5" r="1.5" fill="currentColor" />
+                      <circle cx="15.5" cy="18.5" r="1.5" fill="currentColor" />
+                    </svg>
+                  </div>
+                  <span className="absolute -top-1.5 -right-1.5 text-[7px] font-black uppercase tracking-wide bg-gradient-to-r from-pink-500 to-rose-500 text-white px-1.5 py-0.5 rounded-full leading-none shadow-sm">beta</span>
                 </div>
                 <div className="flex items-center">
                   <span className="font-extrabold text-lg text-white tracking-tight">SatikFlow</span>
