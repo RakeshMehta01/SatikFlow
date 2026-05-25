@@ -202,7 +202,7 @@ export const CallingWorkspace: React.FC = () => {
         <div className="space-y-2">
           <h3 className="text-xl font-bold text-slate-900">Calling Queue Completed!</h3>
           <p className="text-sm text-slate-500 leading-relaxed">
-            All your assigned leads have been dialed, categorized, or scheduled. Check back later once manager assigns more Excel or GMB records.
+            All your assigned leads have been dialed, categorized, or scheduled. Check back later once manager assigns more Excel or records.
           </p>
         </div>
         <button
@@ -221,7 +221,7 @@ export const CallingWorkspace: React.FC = () => {
       <div className="pb-2 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 leading-tight">Agent Calling Workspace</h2>
-          <p className="text-xs text-slate-500 mt-0.5">Rapid sequential dialing mode. View GMB links and update outcomes in one screen.</p>
+          <p className="text-xs text-slate-500 mt-0.5">Rapid sequential dialing mode. View listing links and update outcomes in one screen.</p>
         </div>
         
         {/* Progress Tracker bar */}
@@ -256,7 +256,7 @@ export const CallingWorkspace: React.FC = () => {
               <div className="space-y-1">
                 <h3 className="text-xl font-bold text-slate-900">{currentLead.businessName || currentLead.displayName}</h3>
                 <span className="bg-slate-100 text-slate-800 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-                  {currentLead.gmbCategory || 'General GMB Lead'}
+                  {currentLead.gmbCategory || 'General lead'}
                 </span>
               </div>
               <span className="bg-brand-purple/10 text-brand-purple font-semibold text-[10px] px-2.5 py-1 rounded">
@@ -289,7 +289,7 @@ export const CallingWorkspace: React.FC = () => {
                   Missing Contact Number (Incomplete Lead)
                 </p>
                 <p className="text-red-700 leading-relaxed">
-                  This lead is flagged as <strong>INCOMPLETE</strong>. Use the edit inputs below or check the website/GMB links to find their contact details, fill in the mobile number, and dial to proceed.
+                  This lead is flagged as <strong>INCOMPLETE</strong>. Use the edit inputs below or check the website/listing links to find their contact details, fill in the mobile number, and dial to proceed.
                 </p>
               </div>
             )}

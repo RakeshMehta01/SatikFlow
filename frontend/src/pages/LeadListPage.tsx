@@ -118,7 +118,7 @@ export const LeadListPage: React.FC = () => {
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
             {user?.role === 'MANAGER'
-              ? 'Complete list of all GMB and spreadsheet imported prospect profiles.'
+              ? 'Complete list of all imported prospect profiles.'
               : 'Directory of your active calling allocations, follow-up schedules & outcomes.'}
           </p>
         </div>

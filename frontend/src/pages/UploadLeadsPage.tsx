@@ -213,7 +213,7 @@ export const UploadLeadsPage: React.FC = () => {
       {/* Header */}
       <div className="pb-2 border-b border-slate-200">
         <h2 className="text-2xl font-extrabold text-slate-900 leading-tight">Import Lead Spreadsheets</h2>
-        <p className="text-xs text-slate-500 mt-0.5">Upload, map and parse GMB exports, Excel, CSV, or Numbers files directly into active lead pools.</p>
+        <p className="text-xs text-slate-500 mt-0.5">Upload, map and parse exports, Excel, CSV, or Numbers files directly into active lead pools.</p>
       </div>
 
       {/* Main Error */}
@@ -407,7 +407,7 @@ export const UploadLeadsPage: React.FC = () => {
             
             <div>
               <h3 className="text-xl font-extrabold text-slate-900">Leads Imported Successfully</h3>
-              <p className="text-xs text-slate-500 mt-1">GMB and spreadsheet records parsed, validated & loaded into database.</p>
+              <p className="text-xs text-slate-500 mt-1">lead records parsed, validated & loaded into database.</p>
             </div>
 
             {/* Summary statistics */}

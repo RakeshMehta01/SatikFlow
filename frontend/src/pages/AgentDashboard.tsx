@@ -82,7 +82,7 @@ export const AgentDashboard: React.FC = () => {
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Your Dialing Cockpit</h2>
           <p className="text-slate-300 text-sm leading-relaxed">
-            Review your assigned GMB leads, call results, schedule necessary callbacks and keep converting warm prospects into customers.
+            Review your assigned leads, call results, schedule necessary callbacks and keep converting warm prospects into customers.
           </p>
           <div className="pt-2">
             <Link

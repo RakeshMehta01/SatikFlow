@@ -27,8 +27,8 @@ export const LandingPage: React.FC = () => {
 
   const faqData = [
     {
-      q: "Can we upload Google My Business (GMB) leads?",
-      a: "Yes! SatikFlow CRM is specifically optimized for GMB Excel/CSV exports. You can upload files directly, map whatever column names you have, and immediately start dialing."
+      q: "Can we upload leads?",
+      a: "Yes! SatikFlow CRM is specifically optimized for Excel/CSV exports. You can upload files directly, map whatever column names you have, and immediately start dialing."
     },
     {
       q: "What if some fields (like phone numbers) are missing in the import?",
@@ -196,9 +196,9 @@ export const LandingPage: React.FC = () => {
       {/* 3. Problem Section */}
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-extrabold text-slate-900 mb-4">The Messy Reality of GMB Leads</h2>
+          <h2 className="text-3xl font-extrabold text-slate-900 mb-4">The Messy Reality of leads</h2>
           <p className="text-slate-500 max-w-2xl mx-auto text-base">
-            Sales teams dialing Google My Business prospects struggle with scattered spreadsheets and missed opportunities.
+            Sales teams dialing prospects struggle with scattered spreadsheets and missed opportunities.
           </p>
         </div>
 
@@ -209,7 +209,7 @@ export const LandingPage: React.FC = () => {
             </div>
             <h3 className="text-lg font-bold text-slate-900 mb-2">Messy & Missing Fields</h3>
             <p className="text-sm text-slate-500">
-              GMB exports have completely different columns depending on the tool. Standard CRMs reject rows if a phone or contact name is missing.
+              exports have completely different columns depending on the tool. Standard CRMs reject rows if a phone or contact name is missing.
             </p>
           </div>
 
@@ -240,7 +240,7 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-extrabold text-slate-900 mb-6">Designed specifically for flexible GMB calling pipelines</h2>
+              <h2 className="text-3xl font-extrabold text-slate-900 mb-6">Designed specifically for flexible calling pipelines</h2>
               <div className="space-y-6">
                 <div className="flex items-start">
                   <div className="w-6 h-6 bg-brand-purple/10 text-brand-purple rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-1">
@@ -308,7 +308,7 @@ export const LandingPage: React.FC = () => {
         <div className="text-center mb-16">
           <h2 className="text-3xl font-extrabold text-slate-900 mb-4">Core Sales CRM Capabilities</h2>
           <p className="text-slate-500 max-w-2xl mx-auto text-base">
-            Essential tools designed to help manager and agent collaborate and secure GMB prospects.
+            Essential tools designed to help manager and agent collaborate and secure prospects.
           </p>
         </div>
 
@@ -319,7 +319,7 @@ export const LandingPage: React.FC = () => {
               <div className="w-10 h-10 bg-pink-100 text-pink-600 rounded-lg flex items-center justify-center mb-4">
                 <UploadCloud className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Flexible GMB Lead Upload</h3>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Flexible lead Upload</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
                 Accepts csv/xlsx files containing columns of varying names. If a cell or header is missing, the CRM will successfully ingest it without throwing errors.
               </p>
@@ -347,7 +347,7 @@ export const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Agent Calling Workspace</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Dial through list leads sequentially with a single click. Review GMB links, ratings, categories, and take notes quickly without page-hopping.
+                Dial through list leads sequentially with a single click. Review listing links, ratings, categories, and take notes quickly without page-hopping.
               </p>
             </div>
           </div>
@@ -386,7 +386,7 @@ export const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Activity Timeline</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Keep a history of call outcomes, remarks, status changes, and follow-up activities logged against every GMB business profile for clear audit.
+                Keep a history of call outcomes, remarks, status changes, and follow-up activities logged against every business profile for clear audit.
               </p>
             </div>
           </div>
@@ -407,7 +407,7 @@ export const LandingPage: React.FC = () => {
             <div className="flex flex-col items-center text-center">
               <div className="w-10 h-10 rounded-full bg-brand-purple text-white flex items-center justify-center font-bold text-sm mb-4 shadow-md">1</div>
               <h4 className="font-bold text-slate-900 mb-1">Upload Data</h4>
-              <p className="text-xs text-slate-500">Upload GMB or general CSV/Excel files.</p>
+              <p className="text-xs text-slate-500">Upload CSV, Excel, or other files.</p>
             </div>
  
             <div className="flex flex-col items-center text-center">
@@ -517,7 +517,7 @@ export const LandingPage: React.FC = () => {
       <section id="faq" className="py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-extrabold text-slate-900 mb-4">Frequently Asked Questions</h2>
-          <p className="text-slate-500 text-base">Everything you need to know about GMB lead uploading and calling management.</p>
+          <p className="text-slate-500 text-base">Everything you need to know about lead uploading and calling management.</p>
         </div>
 
         <div className="space-y-4">
@@ -552,7 +552,7 @@ export const LandingPage: React.FC = () => {
       <section className="bg-navy-950 text-white py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20"></div>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-8">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Start managing your GMB leads professionally.</h2>
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Start managing your leads professionally.</h2>
           <p className="text-slate-300 max-w-xl mx-auto text-base">
             Import spreadsheets, map available columns, assign calling agent logs, and boost your sales outcomes.
           </p>
@@ -591,7 +591,7 @@ export const LandingPage: React.FC = () => {
               <span className="font-semibold text-slate-200">SatikFlow CRM</span>
             </div>
             <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
-              Sales dialing and customer relations management specifically designed for Google My Business leads.
+              Sales dialing and customer relations management specifically designed for leads.
             </p>
           </div>
           <div>

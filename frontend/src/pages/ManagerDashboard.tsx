@@ -112,7 +112,7 @@ export const ManagerDashboard: React.FC = () => {
             <div className="p-2 bg-slate-100 rounded-lg text-slate-600"><Layers className="w-4 h-4" /></div>
           </div>
           <p className="text-3xl font-extrabold text-slate-900">{stats.totalLeads}</p>
-          <div className="text-[10px] text-slate-400 font-medium">Imported from GMB / Files</div>
+          <div className="text-[10px] text-slate-400 font-medium">Imported from Imported Files</div>
         </div>
 
         {/* Assigned Leads */}
