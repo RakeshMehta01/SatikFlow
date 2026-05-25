@@ -287,7 +287,7 @@ export const AssignLeadsPage: React.FC = () => {
                   <th className="p-4">Lead Name / Business</th>
                   <th className="p-4">Mobile</th>
                   <th className="p-4">City</th>
-                  <th className="p-4">GMB Category</th>
+                  <th className="p-4">Category</th>
                   <th className="p-4">Assigned Agent</th>
                   <th className="p-4">Status</th>
                   <th className="p-4">Source</th>

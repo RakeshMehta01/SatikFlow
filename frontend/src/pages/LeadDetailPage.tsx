@@ -312,7 +312,7 @@ export const LeadDetailPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-600 mb-1">GMB Category</label>
+                    <label className="block font-bold text-slate-600 mb-1">Category</label>
                     <input
                       type="text"
                       name="gmbCategory"
@@ -478,7 +478,7 @@ export const LeadDetailPage: React.FC = () => {
                   <div className="flex items-center space-x-3 py-1">
                     <Sparkles className="w-4 h-4 text-slate-400 flex-shrink-0" />
                     <div>
-                      <span className="text-[10px] text-slate-400 block uppercase font-bold">GMB Rating & Reviews</span>
+                      <span className="text-[10px] text-slate-400 block uppercase font-bold">Rating & Reviews</span>
                       <span className="font-semibold text-slate-900">
                         {lead.rating ? `⭐ ${lead.rating} (${lead.reviewCount || 0} reviews)` : 'No ratings data'}
                       </span>

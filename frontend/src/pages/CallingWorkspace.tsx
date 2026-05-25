@@ -353,7 +353,7 @@ export const CallingWorkspace: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-500 mb-1">GMB Category</label>
+                  <label className="block font-bold text-slate-500 mb-1">Category</label>
                   <input
                     type="text"
                     name="gmbCategory"

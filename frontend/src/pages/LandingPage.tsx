@@ -281,7 +281,7 @@ export const LandingPage: React.FC = () => {
               <div className="space-y-3 bg-slate-50 p-4 rounded-lg border border-slate-200">
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-slate-400 block">GMB Category</span>
+                    <span className="text-slate-400 block">Category</span>
                     <span className="font-medium text-slate-800">Web Designer</span>
                   </div>
                   <div>

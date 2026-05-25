@@ -68,8 +68,8 @@ export const UploadLeadsPage: React.FC = () => {
     { value: 'email', label: 'Email Address' },
     { value: 'website', label: 'Website URL' },
     { value: 'googleMapsUrl', label: 'Google Maps Link' },
-    { value: 'gmbCategory', label: 'GMB Category' },
-    { value: 'rating', label: 'GMB Rating' },
+    { value: 'gmbCategory', label: 'Category' },
+    { value: 'rating', label: 'Rating' },
     { value: 'reviewCount', label: 'Review Count' },
     { value: 'address', label: 'Address' },
     { value: 'city', label: 'City' },
@@ -213,7 +213,7 @@ export const UploadLeadsPage: React.FC = () => {
       {/* Header */}
       <div className="pb-2 border-b border-slate-200">
         <h2 className="text-2xl font-extrabold text-slate-900 leading-tight">Import Lead Spreadsheets</h2>
-        <p className="text-xs text-slate-500 mt-0.5">Upload, map and parse exports, Excel, CSV, or Numbers files directly into active lead pools.</p>
+        <p className="text-xs text-slate-500 mt-0.5">Upload, map and parse Excel, CSV, or other files directly into active lead pools.</p>
       </div>
 
       {/* Main Error */}
@@ -262,7 +262,7 @@ export const UploadLeadsPage: React.FC = () => {
                         : 'border-slate-300 text-slate-600 bg-white hover:bg-slate-50'
                     }`}
                   >
-                    {type === 'GMB' ? 'GMB' : type === 'EXCEL' ? 'Excel' : type === 'CSV' ? 'CSV' : type === 'NUMBERS' ? 'Numbers' : 'Manual'}
+                    {type === 'GMB' ? 'Lead Import' : type === 'EXCEL' ? 'Excel' : type === 'CSV' ? 'CSV' : type === 'NUMBERS' ? 'Numbers' : 'Manual'}
                   </button>
                 ))}
               </div>
