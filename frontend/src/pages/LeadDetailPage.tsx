@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -11,11 +11,24 @@ import {
   Clock,
   Sparkles,
   AlertCircle,
-  CheckCircle2,
   Edit3,
-  UserCheck
+  UserCheck,
+  Calendar,
+  PhoneCall,
+  RefreshCw,
+  PhoneMissed,
+  PhoneOff,
+  ThumbsUp,
+  Trophy,
+  ThumbsDown,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import usePageTitle from '../hooks/usePageTitle';
+import { formatDate, formatTime, buildISTIsoString } from '../utils/dateFormat';
+import { toast } from '../components/Toast';
+import { MultiSelect, getServiceLabel } from '../components/MultiSelect';
 
 interface Lead {
   _id: string;
@@ -47,6 +60,7 @@ interface Lead {
   nextFollowUpAt?: string;
   customFields?: Record<string, any>;
   createdAt: string;
+  interestedServices?: string[];
 }
 
 interface Activity {
@@ -58,10 +72,29 @@ interface Activity {
   };
   activityType: string;
   status?: string;
+  leadStatus?: string;
   remark?: string;
   nextFollowUpAt?: string;
   createdAt: string;
+  interestedServices?: string[];
 }
+
+const STATUS_OPTIONS = [
+  { value: 'CONTACTED', label: 'Connected / Dialed', icon: PhoneCall, iconColor: 'text-teal-600', bgColor: 'bg-teal-50' },
+  { value: 'NEW', label: 'Reset status to NEW', icon: RefreshCw, iconColor: 'text-blue-600', bgColor: 'bg-blue-50' },
+  { value: 'NOT_PICKED', label: 'Not Picked', icon: PhoneMissed, iconColor: 'text-orange-600', bgColor: 'bg-orange-50' },
+  { value: 'BUSY', label: 'Busy', icon: PhoneOff, iconColor: 'text-amber-600', bgColor: 'bg-amber-50' },
+  { value: 'FOLLOW_UP', label: 'Follow Up Scheduled', icon: Calendar, iconColor: 'text-amber-700', bgColor: 'bg-amber-100/55' },
+  { value: 'INTERESTED', label: 'Interested (Warm)', icon: ThumbsUp, iconColor: 'text-indigo-600', bgColor: 'bg-indigo-50' },
+  { value: 'CONVERTED', label: 'Converted (Sale Won)', icon: Trophy, iconColor: 'text-green-600', bgColor: 'bg-green-50' },
+  { value: 'NOT_INTERESTED', label: 'Not Interested', icon: ThumbsDown, iconColor: 'text-slate-500', bgColor: 'bg-slate-50' },
+  { value: 'INVALID_NUMBER', label: 'Invalid Number', icon: AlertTriangle, iconColor: 'text-red-600', bgColor: 'bg-red-50' },
+];
+
+const getStatusLabel = (status: string) => {
+  const option = STATUS_OPTIONS.find(o => o.value === status);
+  return option ? option.label : status;
+};
 
 export const LeadDetailPage: React.FC = () => {
   usePageTitle('Lead Detail');
@@ -77,6 +110,10 @@ export const LeadDetailPage: React.FC = () => {
   const [editForm, setEditForm] = useState<Partial<Lead>>({});
   const [savingLead, setSavingLead] = useState(false);
 
+  // Edit Services state
+  const [editServices, setEditServices] = useState<string[]>([]);
+  const [editCustomService, setEditCustomService] = useState<string>('');
+
   // Log Call Activity state
   const [activityStatus, setActivityStatus] = useState('CONTACTED');
   const [remark, setRemark] = useState('');
@@ -84,9 +121,27 @@ export const LeadDetailPage: React.FC = () => {
   const [followUpTime, setFollowUpTime] = useState('10:00');
   const [loggingCall, setLoggingCall] = useState(false);
 
+  // Log Services state
+  const [logServices, setLogServices] = useState<string[]>([]);
+  const [logCustomService, setLogCustomService] = useState<string>('');
+
   // Messages
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -104,11 +159,28 @@ export const LeadDetailPage: React.FC = () => {
         api.get(`/activities/lead/${id}`)
       ]);
 
-      setLead(leadRes.data);
-      setEditForm(leadRes.data);
+      const leadData = leadRes.data;
+      setLead(leadData);
+      setEditForm(leadData);
       setActivities(activitiesRes.data);
+
+      const services = leadData.interestedServices || [];
+      const hasOther = services.some((s: string) => s.startsWith('Other: '));
+      const otherVal = services.find((s: string) => s.startsWith('Other: '));
+      const cleanServices = services.map((s: string) => s.startsWith('Other: ') ? 'Other' : s);
+      
+      setEditServices(cleanServices);
+      setLogServices(cleanServices);
+      if (hasOther && otherVal) {
+        setEditCustomService(otherVal.substring(7));
+        setLogCustomService(otherVal.substring(7));
+      } else {
+        setEditCustomService('');
+        setLogCustomService('');
+      }
     } catch (error: any) {
       console.error('Error fetching lead details:', error);
+      toast.error('Failed to fetch lead profile details.');
       setErrorMsg('Failed to fetch lead profile details.');
     } finally {
       setLoading(false);
@@ -126,18 +198,26 @@ export const LeadDetailPage: React.FC = () => {
   const handleSaveDetails = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingLead(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
+
+    if (editServices.includes('Other') && !editCustomService.trim()) {
+      toast.warning('Please specify details for "Other" service.');
+      setSavingLead(false);
+      return;
+    }
 
     try {
-      const res = await api.put(`/leads/${id}`, editForm);
+      const mappedServices = editServices.map(s => s === 'Other' ? `Other: ${editCustomService.trim()}` : s);
+      const res = await api.put(`/leads/${id}`, {
+        ...editForm,
+        interestedServices: mappedServices
+      });
       setLead(res.data);
       setIsEditing(false);
-      setSuccessMsg('Lead details updated successfully.');
+      toast.success('Lead details updated successfully.');
       fetchLeadAndActivities(); // Reload activity timeline since details edit might log audit activity
     } catch (error: any) {
       console.error('Error updating lead details:', error);
-      setErrorMsg(error.response?.data?.message || 'Failed to update details');
+      toast.error(error.response?.data?.message || 'Failed to update details');
     } finally {
       setSavingLead(false);
     }
@@ -146,35 +226,52 @@ export const LeadDetailPage: React.FC = () => {
   const handleLogActivity = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoggingCall(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
+
+    const isPositiveStatus = ['CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'CONVERTED'].includes(activityStatus);
+    if (isPositiveStatus) {
+      if (logServices.length === 0) {
+        toast.warning('Please select at least one interested service.');
+        setLoggingCall(false);
+        return;
+      }
+      if (logServices.includes('Other') && !logCustomService.trim()) {
+        toast.warning('Please specify details for "Other" service.');
+        setLoggingCall(false);
+        return;
+      }
+    }
 
     let nextFollowUpAt: string | undefined = undefined;
     if (activityStatus === 'FOLLOW_UP') {
       if (!followUpDate) {
-        setErrorMsg('Please schedule a callback date and time');
+        toast.warning('Please schedule a callback date and time');
         setLoggingCall(false);
         return;
       }
-      nextFollowUpAt = `${followUpDate}T${followUpTime}:00`;
+      nextFollowUpAt = buildISTIsoString(followUpDate, followUpTime);
     }
 
     try {
+      const servicesPayload = isPositiveStatus
+        ? logServices.map(s => s === 'Other' ? `Other: ${logCustomService.trim()}` : s)
+        : undefined;
+
       await api.post('/activities', {
         leadId: id,
         activityType: 'CALL',
         status: activityStatus,
         remark,
-        nextFollowUpAt
+        nextFollowUpAt,
+        interestedServices: servicesPayload
       });
 
       setRemark('');
       setFollowUpDate('');
-      setSuccessMsg('Call logged successfully. Status updated.');
+      toast.success('Call logged successfully. Status updated.');
       fetchLeadAndActivities(); // Reload details and timeline
     } catch (error: any) {
       console.error('Error logging activity:', error);
-      setErrorMsg(error.response?.data?.message || 'Failed to save call outcomes');
+      toast.error(error.response?.data?.message || 'Failed to save call outcomes');
     } finally {
       setLoggingCall(false);
     }
@@ -214,13 +311,7 @@ export const LeadDetailPage: React.FC = () => {
         <span className="text-xs text-slate-400">Lead ID: {lead._id}</span>
       </div>
 
-      {/* Messages */}
-      {successMsg && (
-        <div className="bg-green-50 border border-green-200 text-emerald-700 p-4 rounded-[12px] flex items-center space-x-3 shadow-sm">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-          <p className="text-xs font-semibold">{successMsg}</p>
-        </div>
-      )}
+      {/* Messages replaced by global toast */}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* COLUMN 1 & 2: Lead Profile Info */}
@@ -232,12 +323,17 @@ export const LeadDetailPage: React.FC = () => {
               <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                 lead.status === 'NEW' ? 'bg-blue-100 text-blue-800' :
                 lead.status === 'INCOMPLETE' ? 'bg-red-100 text-red-800' :
+                lead.status === 'NOT_PICKED' ? 'bg-orange-100 text-orange-800' :
+                lead.status === 'BUSY' ? 'bg-yellow-100 text-yellow-800' :
+                lead.status === 'CONTACTED' ? 'bg-teal-100 text-teal-800' :
                 lead.status === 'FOLLOW_UP' ? 'bg-amber-100 text-amber-800' :
                 lead.status === 'INTERESTED' ? 'bg-indigo-100 text-indigo-800' :
                 lead.status === 'CONVERTED' ? 'bg-green-100 text-green-800' :
+                lead.status === 'NOT_INTERESTED' ? 'bg-slate-100 text-slate-600' :
+                lead.status === 'INVALID_NUMBER' ? 'bg-rose-100 text-rose-800' :
                 'bg-slate-100 text-slate-800'
               }`}>
-                {lead.status}
+                {getStatusLabel(lead.status)}
               </span>
             </div>
 
@@ -371,6 +467,15 @@ export const LeadDetailPage: React.FC = () => {
                       className="w-full rounded-[8px] border border-slate-350 bg-white py-1.5 px-3 focus:outline-none focus:ring-1 focus:ring-brand-purple"
                     />
                   </div>
+                  <div className="col-span-1 sm:col-span-2">
+                    <MultiSelect
+                      selectedValues={editServices}
+                      onChange={setEditServices}
+                      customValue={editCustomService}
+                      onCustomChange={setEditCustomService}
+                      required={false}
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -494,6 +599,22 @@ export const LeadDetailPage: React.FC = () => {
                       </span>
                     </div>
                   </div>
+
+                  {lead.interestedServices && lead.interestedServices.length > 0 && (
+                    <div className="flex items-start space-x-3 py-1 col-span-1 sm:col-span-2">
+                      <Sparkles className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <span className="text-[10px] text-slate-400 block uppercase font-bold">Services of Interest</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {lead.interestedServices.map((service, index) => (
+                            <span key={index} className="inline-flex items-center bg-brand-purple/10 text-brand-purple border border-brand-purple/20 text-[10px] font-bold px-2 py-0.5 rounded">
+                              {getServiceLabel(service)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Requirements / Remarks */}
@@ -565,27 +686,75 @@ export const LeadDetailPage: React.FC = () => {
               <Phone className="w-4 h-4 mr-1.5 text-brand-purple" />
               Log Calling Outcome
             </h4>
-
             <form onSubmit={handleLogActivity} className="space-y-3.5 text-xs text-left">
-              {/* Call Result select */}
-              <div>
+              {/* Call Outcome Status select */}
+              <div className="relative" ref={dropdownRef}>
                 <label className="block font-bold text-slate-600 mb-1">Call Outcome Status</label>
-                <select
-                  value={activityStatus}
-                  onChange={(e) => setActivityStatus(e.target.value)}
-                  className="w-full bg-white border border-slate-350 rounded-[8px] py-2 px-3 focus:outline-none focus:ring-1 focus:ring-brand-purple"
+                <button
+                  type="button"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="w-full bg-white border border-slate-355 rounded-[8px] py-2 px-3 focus:outline-none focus:ring-1 focus:ring-brand-purple flex items-center justify-between shadow-sm hover:border-slate-400 transition-colors cursor-pointer text-xs"
                 >
-                  <option value="CONTACTED">Connected / Dialed</option>
-                  <option value="NEW">Reset status to NEW</option>
-                  <option value="NOT_PICKED">Not Picked</option>
-                  <option value="BUSY">Busy</option>
-                  <option value="FOLLOW_UP">Follow Up Scheduled</option>
-                  <option value="INTERESTED">Interested (Warm)</option>
-                  <option value="CONVERTED">Converted (Sale Won)</option>
-                  <option value="NOT_INTERESTED">Not Interested</option>
-                  <option value="INVALID_NUMBER">Invalid Number</option>
-                </select>
+                  <span className="flex items-center space-x-2">
+                    {(() => {
+                      const selected = STATUS_OPTIONS.find(o => o.value === activityStatus);
+                      if (selected) {
+                        const Icon = selected.icon;
+                        return (
+                          <>
+                            <Icon className={`w-3.5 h-3.5 ${selected.iconColor}`} />
+                            <span className="font-medium text-slate-700">{selected.label}</span>
+                          </>
+                        );
+                      }
+                      return <span className="text-slate-400">Select Status</span>;
+                    })()}
+                  </span>
+                  {dropdownOpen ? (
+                    <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                  )}
+                </button>
+
+                {dropdownOpen && (
+                  <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-[12px] shadow-xl py-1 max-h-60 overflow-y-auto">
+                    {STATUS_OPTIONS.map((option) => {
+                      const Icon = option.icon;
+                      const isSelected = activityStatus === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            setActivityStatus(option.value);
+                            setDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs flex items-center space-x-2.5 transition-colors cursor-pointer ${
+                            isSelected ? 'bg-slate-100 font-semibold' : 'hover:bg-slate-50'
+                          }`}
+                        >
+                          <span className={`p-1 rounded-[6px] ${option.bgColor}`}>
+                            <Icon className={`w-3.5 h-3.5 ${option.iconColor}`} />
+                          </span>
+                          <span className="text-slate-700">{option.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
+
+              {/* Interested Services */}
+              {['CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'CONVERTED'].includes(activityStatus) && (
+                <MultiSelect
+                  selectedValues={logServices}
+                  onChange={setLogServices}
+                  customValue={logCustomService}
+                  onCustomChange={setLogCustomService}
+                  required={true}
+                />
+              )}
 
               {/* Follow-up date select (displays only when status is FOLLOW_UP) */}
               {activityStatus === 'FOLLOW_UP' && (
@@ -656,18 +825,29 @@ export const LeadDetailPage: React.FC = () => {
                     <div className="absolute -left-1.5 top-1 w-3 h-3 rounded-full bg-brand-purple border-2 border-white"></div>
                     
                     <div className="flex justify-between items-start">
-                      <span className="font-bold text-slate-800 uppercase tracking-wider text-[9px] bg-slate-100 px-1.5 py-0.5 rounded">
+                      <span className="font-bold text-slate-800 uppercase tracking-wider text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">
                         {act.activityType}
                       </span>
-                      <span className="text-[10px] text-slate-400">
-                        {new Date(act.createdAt).toLocaleDateString()} {new Date(act.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <span className="text-xs font-semibold text-slate-500">
+                        {formatDate(act.createdAt)} {formatTime(act.createdAt)}
                       </span>
                     </div>
 
-                    {act.status && (
+                    {(act.status || act.leadStatus) && (
                       <p className="mt-1 text-slate-700">
-                        Lead status set to: <strong className="text-slate-900">{act.status}</strong>
+                        Lead status set to: <strong className="text-slate-900">{getStatusLabel(act.status || act.leadStatus || '')}</strong>
                       </p>
+                    )}
+
+                    {act.interestedServices && act.interestedServices.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        <span className="text-[10px] text-slate-500 font-semibold mr-1 self-center">Interests captured:</span>
+                        {act.interestedServices.map((service, index) => (
+                          <span key={index} className="inline-flex items-center bg-brand-purple/10 text-brand-purple border border-brand-purple/20 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                            {getServiceLabel(service)}
+                          </span>
+                        ))}
+                      </div>
                     )}
 
                     {act.remark && (
@@ -677,8 +857,12 @@ export const LeadDetailPage: React.FC = () => {
                     )}
 
                     {act.nextFollowUpAt && (
-                      <p className="mt-1.5 text-amber-800 font-semibold bg-amber-50 py-0.5 px-2 rounded inline-block">
-                        Scheduled callback: {new Date(act.nextFollowUpAt).toLocaleDateString()} {new Date(act.nextFollowUpAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <p className="mt-2 text-slate-600 flex items-center flex-wrap gap-1.5 font-medium">
+                        <Calendar className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                        <span>Scheduled callback:</span>
+                        <span className="bg-amber-50 text-amber-800 border border-amber-250/70 rounded-[6px] px-2 py-0.5 font-semibold text-[11px]">
+                          {formatDate(act.nextFollowUpAt)} at {formatTime(act.nextFollowUpAt)}
+                        </span>
                       </p>
                     )}
 

@@ -105,10 +105,12 @@ export const getAgentDashboard = async (req: AuthRequest, res: Response): Promis
       status: 'INCOMPLETE'
     });
 
-    // 3. Calls Pending (New, Not Picked, Busy, Follow Up status leads assigned to me)
+    // Calls Pending = leads that genuinely still need to be called
+    // Must match exactly what getMyLeads returns: NEW, INCOMPLETE, NOT_PICKED, BUSY
+    // FOLLOW_UP is NOT included here — those go to the Follow-Ups page
     const callsPending = await Lead.countDocuments({
       assignedTo: agentId,
-      status: { $in: ['NEW', 'NOT_PICKED', 'BUSY', 'FOLLOW_UP'] }
+      status: { $in: ['NEW', 'INCOMPLETE', 'NOT_PICKED', 'BUSY'] }
     });
 
     // 4. Calls Done Today by this agent

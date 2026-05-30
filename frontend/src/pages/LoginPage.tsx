@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { Lock, Mail, ArrowLeft, AlertCircle, ShieldCheck, Sparkles } from 'lucide-react';
+import { Lock, Mail, ArrowLeft, ShieldCheck, Sparkles, Eye, EyeOff } from 'lucide-react';
 import Swal from 'sweetalert2';
 import usePageTitle from '../hooks/usePageTitle';
+import { toast } from '../components/Toast';
 
 export const LoginPage: React.FC = () => {
   usePageTitle('Sign In');
@@ -13,7 +14,7 @@ export const LoginPage: React.FC = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // If already authenticated, redirect
@@ -26,10 +27,9 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
     if (!email || !password) {
-      setError('Please fill in all fields');
+      toast.warning('Please fill in all fields');
       return;
     }
 
@@ -39,6 +39,7 @@ export const LoginPage: React.FC = () => {
       const { token, user: loggedUser } = response.data;
 
       login(token, loggedUser);
+      toast.success(`Welcome back, ${loggedUser.name}! Login successful.`);
 
       // Navigate to corresponding dashboard
       const destination = loggedUser.role === 'MANAGER' ? '/manager/dashboard' : '/agent/dashboard';
@@ -46,9 +47,9 @@ export const LoginPage: React.FC = () => {
     } catch (err: any) {
       console.error('Login submission error:', err);
       if (err.response && err.response.data) {
-        setError(err.response.data.message || 'Login failed. Please try again.');
+        toast.error(err.response.data.message || 'Login failed. Please try again.');
       } else {
-        setError('Connection to backend failed. Please check if backend is running.');
+        toast.error('Connection to backend failed. Please check if backend is running.');
       }
     } finally {
       setIsSubmitting(false);
@@ -159,17 +160,6 @@ export const LoginPage: React.FC = () => {
             <h3 className="text-2xl font-bold text-slate-900">Account Sign In</h3>
             <p className="text-sm text-slate-500">Please enter your credentials to open the workspace.</p>
           </div>
-
-
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 rounded-[8px] p-3 text-xs flex items-center space-x-2 animate-shake">
-              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-              <span className="font-medium">{error}</span>
-            </div>
-          )}
-
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4 text-left">
             <div>
@@ -207,13 +197,25 @@ export const LoginPage: React.FC = () => {
                 </div>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-10 w-full rounded-[8px] border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple bg-white text-slate-900 text-sm transition-all duration-150 h-11"
+                  className="pl-10 pr-10 w-full rounded-[8px] border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple bg-white text-slate-900 text-sm transition-all duration-150 h-11"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
               </div>
             </div>
 

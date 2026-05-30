@@ -6,16 +6,19 @@ import {
   Calendar,
   Phone,
   Eye,
-  AlertCircle,
   CheckCircle,
   Layers
 } from 'lucide-react';
 import usePageTitle from '../hooks/usePageTitle';
+import { formatDate, formatTime } from '../utils/dateFormat';
+import { toast } from '../components/Toast';
+import { getServiceLabel } from '../components/MultiSelect';
 
 interface Lead {
   _id: string;
   displayName: string;
   businessName?: string;
+  customerName?: string;
   mobile?: string;
   city?: string;
   gmbCategory?: string;
@@ -26,6 +29,7 @@ interface Lead {
     email: string;
   };
   nextFollowUpAt: string;
+  interestedServices?: string[];
 }
 
 interface Agent {
@@ -53,7 +57,6 @@ export const FollowUpsPage: React.FC = () => {
   // UI state
   const [activeTab, setActiveTab] = useState<'today' | 'overdue' | 'upcoming'>('today');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchFollowUps();
@@ -65,7 +68,6 @@ export const FollowUpsPage: React.FC = () => {
   const fetchFollowUps = async () => {
     try {
       setLoading(true);
-      setError(null);
 
       if (user?.role === 'AGENT') {
         const res = await api.get('/follow-ups/my');
@@ -78,7 +80,7 @@ export const FollowUpsPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Error fetching follow-ups:', err);
-      setError('Could not load scheduled follow-up alerts from database.');
+      toast.error('Could not load scheduled follow-up alerts from database.');
     } finally {
       setLoading(false);
     }
@@ -119,13 +121,7 @@ export const FollowUpsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-[12px] flex items-center space-x-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-          <span className="text-xs font-semibold">{error}</span>
-        </div>
-      )}
+      {/* Messages replaced by global toast */}
 
       {/* --- AGENT VIEW: Segmented Tabs (Today, Overdue, Upcoming) --- */}
       {user?.role === 'AGENT' && (
@@ -180,18 +176,30 @@ export const FollowUpsPage: React.FC = () => {
                   <tbody className="divide-y divide-slate-100 text-slate-700">
                     {activeAgentLeads.map(lead => (
                       <tr key={lead._id} className="hover:bg-slate-50 transition-colors">
-                        <td className="p-4 font-bold text-slate-900">
-                          <div>
-                            <p>{lead.displayName}</p>
+                        <td className="p-4">
+                          <div className="space-y-1">
+                            <p className="font-bold text-slate-900">{lead.displayName}</p>
                             {lead.businessName && lead.businessName !== lead.displayName && (
                               <p className="text-[10px] text-slate-400 font-normal truncate max-w-[180px]">{lead.businessName}</p>
+                            )}
+                            {lead.interestedServices && lead.interestedServices.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-0.5 max-w-[200px]">
+                                {lead.interestedServices.map((service, idx) => (
+                                  <span key={idx} className="bg-brand-purple/10 text-brand-purple border border-brand-purple/20 text-[9px] font-bold px-1.5 py-0 rounded">
+                                    {getServiceLabel(service)}
+                                  </span>
+                                ))}
+                              </div>
                             )}
                           </div>
                         </td>
                         <td className="p-4 font-mono font-medium">{lead.mobile || '—'}</td>
                         <td className="p-4">{lead.gmbCategory || '—'}</td>
-                        <td className="p-4 font-semibold text-amber-700">
-                          {new Date(lead.nextFollowUpAt).toLocaleDateString()} {new Date(lead.nextFollowUpAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <td className="p-4">
+                          <div className="inline-flex items-center space-x-1.5 bg-amber-50 text-amber-800 border border-amber-200/60 rounded-[6px] px-2.5 py-1 text-[11px] font-semibold">
+                            <Calendar className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                            <span>{formatDate(lead.nextFollowUpAt)} at {formatTime(lead.nextFollowUpAt)}</span>
+                          </div>
                         </td>
                         <td className="p-4 text-center">
                           <Link
@@ -275,11 +283,20 @@ export const FollowUpsPage: React.FC = () => {
                   <tbody className="divide-y divide-slate-100 text-slate-700">
                     {managerFollowUps.map(lead => (
                       <tr key={lead._id} className="hover:bg-slate-50 transition-colors">
-                        <td className="p-4 font-bold text-slate-900">
-                          <div>
-                            <p>{lead.displayName}</p>
+                        <td className="p-4">
+                          <div className="space-y-1">
+                            <p className="font-bold text-slate-900">{lead.displayName}</p>
                             {lead.businessName && lead.businessName !== lead.displayName && (
                               <p className="text-[10px] text-slate-400 font-normal truncate max-w-[180px]">{lead.businessName}</p>
+                            )}
+                            {lead.interestedServices && lead.interestedServices.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-0.5 max-w-[200px]">
+                                {lead.interestedServices.map((service, idx) => (
+                                  <span key={idx} className="bg-brand-purple/10 text-brand-purple border border-brand-purple/20 text-[9px] font-bold px-1.5 py-0 rounded">
+                                    {getServiceLabel(service)}
+                                  </span>
+                                ))}
+                              </div>
                             )}
                           </div>
                         </td>
@@ -288,8 +305,11 @@ export const FollowUpsPage: React.FC = () => {
                           {lead.assignedTo?.name || <span className="text-slate-400 italic font-normal">Unassigned</span>}
                         </td>
                         <td className="p-4">{lead.gmbCategory || '—'}</td>
-                        <td className="p-4 font-bold text-amber-700">
-                          {new Date(lead.nextFollowUpAt).toLocaleDateString()} {new Date(lead.nextFollowUpAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <td className="p-4">
+                          <div className="inline-flex items-center space-x-1.5 bg-amber-50 text-amber-800 border border-amber-200/60 rounded-[6px] px-2.5 py-1 text-[11px] font-semibold">
+                            <Calendar className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                            <span>{formatDate(lead.nextFollowUpAt)} at {formatTime(lead.nextFollowUpAt)}</span>
+                          </div>
                         </td>
                         <td className="p-4 text-center">
                           <Link

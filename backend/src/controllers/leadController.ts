@@ -7,7 +7,7 @@ import { AuthRequest } from '../middlewares/auth';
 
 export const getLeads = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { search, status, agentId, city, category, source, incomplete, followUpDate } = req.query;
+    const { search, status, agentId, city, category, source, incomplete, followUpDate, interestedService } = req.query;
     
     const query: any = {};
 
@@ -37,6 +37,10 @@ export const getLeads = async (req: AuthRequest, res: Response): Promise<void> =
     }
     if (source) {
       query.source = source;
+    }
+
+    if (interestedService) {
+      query.interestedServices = interestedService;
     }
 
     // 5. Text Search (BusinessName, CustomerName, Mobile, Category, City)
@@ -163,18 +167,87 @@ export const updateLead = async (req: AuthRequest, res: Response): Promise<void>
     const fieldsToUpdate = [
       'businessName', 'customerName', 'mobile', 'alternatePhone', 'whatsappNumber',
       'email', 'website', 'googleMapsUrl', 'gmbCategory', 'rating', 'reviewCount',
-      'address', 'city', 'state', 'pincode', 'requirement', 'remarks', 'status', 'nextFollowUpAt'
+      'address', 'city', 'state', 'pincode', 'requirement', 'remarks', 'status', 'nextFollowUpAt', 'interestedServices'
     ];
+
+    const changes: string[] = [];
+    const fieldLabels: Record<string, string> = {
+      businessName: 'Business Name',
+      customerName: 'Customer Name',
+      mobile: 'Mobile/Phone',
+      alternatePhone: 'Alternate Phone',
+      whatsappNumber: 'WhatsApp Number',
+      email: 'Email Address',
+      website: 'Website URL',
+      googleMapsUrl: 'Google Maps URL',
+      gmbCategory: 'Category',
+      rating: 'Rating',
+      reviewCount: 'Review Count',
+      address: 'Full Address',
+      city: 'City',
+      state: 'State',
+      pincode: 'Pincode',
+      requirement: 'Requirement Details',
+      remarks: 'Remarks',
+      status: 'Status',
+      nextFollowUpAt: 'Follow Up Date'
+    };
 
     fieldsToUpdate.forEach(field => {
       if (updateData[field] !== undefined) {
-        (lead as any)[field] = updateData[field];
+        const oldVal = (lead as any)[field];
+        const newVal = updateData[field];
+        
+        if (field === 'interestedServices') {
+          const oldArr = Array.isArray(oldVal) ? oldVal : [];
+          const newArr = Array.isArray(newVal) ? newVal : [];
+          const equal = oldArr.length === newArr.length && oldArr.every(x => newArr.includes(x));
+          if (!equal) {
+            changes.push(`Services Interested updated to: ${newArr.join(', ') || 'None'}`);
+            (lead as any)[field] = newArr;
+          }
+        } else {
+          const oldStr = oldVal ? String(oldVal).trim() : '';
+          const newStr = newVal ? String(newVal).trim() : '';
+          
+          if (oldStr !== newStr) {
+            const label = fieldLabels[field] || field;
+            if (!oldStr && newStr) {
+              changes.push(`${label} is added`);
+            } else if (oldStr && !newStr) {
+              changes.push(`${label} is removed`);
+            } else {
+              changes.push(`${label} is updated`);
+            }
+            (lead as any)[field] = newVal;
+          }
+        }
       }
     });
 
-    // Update customFields if provided
+    // Update customFields if provided safely without spreading Mongoose Map internal properties
     if (updateData.customFields) {
-      lead.customFields = { ...lead.customFields, ...updateData.customFields };
+      const plainCustom = lead.customFields && typeof (lead.customFields as any).toJSON === 'function'
+        ? (lead.customFields as any).toJSON()
+        : (lead.customFields instanceof Map ? Object.fromEntries(lead.customFields) : (lead.customFields || {}));
+      
+      Object.entries(updateData.customFields).forEach(([k, v]) => {
+        const oldVal = plainCustom[k];
+        const newVal = v;
+        const oldStr = oldVal ? String(oldVal).trim() : '';
+        const newStr = newVal ? String(newVal).trim() : '';
+        if (oldStr !== newStr) {
+          if (!oldStr && newStr) {
+            changes.push(`Custom field "${k}" is added`);
+          } else if (oldStr && !newStr) {
+            changes.push(`Custom field "${k}" is removed`);
+          } else {
+            changes.push(`Custom field "${k}" is updated`);
+          }
+        }
+      });
+      
+      lead.customFields = { ...plainCustom, ...updateData.customFields };
     }
 
     // Recalculate display name if name changed
@@ -186,6 +259,16 @@ export const updateLead = async (req: AuthRequest, res: Response): Promise<void>
     }
 
     await lead.save();
+
+    // Log update activity if any changes were made
+    if (changes.length > 0) {
+      await LeadActivity.create({
+        leadId: lead._id,
+        userId: req.user?._id,
+        activityType: 'NOTE',
+        remark: `Lead details updated: ${changes.join(', ')}`
+      });
+    }
 
     // Populate and return
     const updatedLead = await Lead.findById(lead._id)
@@ -281,7 +364,16 @@ export const getMyLeads = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    const leads = await Lead.find({ assignedTo: req.user._id })
+    // Only return leads that genuinely still need to be called.
+    // Statuses that mean "done / actioned" are excluded:
+    //   CONTACTED, INTERESTED, CONVERTED, NOT_INTERESTED, INVALID_NUMBER
+    //   FOLLOW_UP leads are handled by the Follow-Ups page (scheduled callbacks)
+    const pendingStatuses: LeadStatus[] = ['NEW', 'INCOMPLETE', 'NOT_PICKED', 'BUSY'];
+
+    const leads = await Lead.find({
+      assignedTo: req.user._id,
+      status: { $in: pendingStatuses }
+    })
       .populate('uploadedBy', 'name email')
       .sort({ updatedAt: -1 });
 
@@ -291,3 +383,4 @@ export const getMyLeads = async (req: AuthRequest, res: Response): Promise<void>
     res.status(500).json({ message: 'Server error' });
   }
 };
+

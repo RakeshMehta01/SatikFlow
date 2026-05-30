@@ -3,12 +3,12 @@ import api from '../services/api';
 import {
   Search,
   UserPlus,
-  CheckCircle2,
-  AlertCircle,
   Users,
   Layers
 } from 'lucide-react';
 import usePageTitle from '../hooks/usePageTitle';
+import { toast } from '../components/Toast';
+import { getServiceLabel, SERVICE_CATEGORIES } from '../components/MultiSelect';
 
 interface Agent {
   id: string;
@@ -34,6 +34,7 @@ interface Lead {
     email: string;
   };
   createdAt: string;
+  interestedServices?: string[];
 }
 
 export const AssignLeadsPage: React.FC = () => {
@@ -47,12 +48,11 @@ export const AssignLeadsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [assignmentFilter, setAssignmentFilter] = useState<'all' | 'unassigned' | 'assigned'>('unassigned');
   const [selectedAgentId, setSelectedAgentId] = useState('');
+  const [serviceFilter, setServiceFilter] = useState('');
   
   // Loading & statuses
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLeadsAndAgents();
@@ -81,7 +81,7 @@ export const AssignLeadsPage: React.FC = () => {
       );
     } catch (error) {
       console.error('Error fetching leads/agents:', error);
-      setErrorMessage('Failed to connect to database. Make sure backend is active.');
+      toast.error('Failed to connect to database. Make sure backend is active.');
     } finally {
       setLoading(false);
     }
@@ -105,13 +105,11 @@ export const AssignLeadsPage: React.FC = () => {
 
   const handleBulkAssign = async () => {
     if (selectedLeadIds.length === 0) {
-      setErrorMessage('Please select at least one lead to assign');
+      toast.warning('Please select at least one lead to assign');
       return;
     }
 
     setAssigning(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
 
     try {
       await api.patch('/leads/bulk-assign', {
@@ -124,12 +122,12 @@ export const AssignLeadsPage: React.FC = () => {
         ? agents.find(a => a.id === selectedAgentId)?.name || 'Agent'
         : 'Unassigned';
 
-      setSuccessMessage(`Successfully updated ${count} leads assignment to: ${agentName}`);
+      toast.success(`Successfully updated ${count} leads assignment to: ${agentName}`);
       setSelectedLeadIds([]);
       fetchLeadsAndAgents(); // Refresh tables
     } catch (error: any) {
       console.error('Bulk assignment error:', error);
-      setErrorMessage(error.response?.data?.message || 'Error occurred during bulk assignment');
+      toast.error(error.response?.data?.message || 'Error occurred during bulk assignment');
     } finally {
       setAssigning(false);
     }
@@ -144,7 +142,8 @@ export const AssignLeadsPage: React.FC = () => {
       (lead.businessName && lead.businessName.toLowerCase().includes(search.toLowerCase())) ||
       (lead.mobile && lead.mobile.includes(search)) ||
       (lead.city && lead.city.toLowerCase().includes(search.toLowerCase())) ||
-      (lead.gmbCategory && lead.gmbCategory.toLowerCase().includes(search.toLowerCase()));
+      (lead.gmbCategory && lead.gmbCategory.toLowerCase().includes(search.toLowerCase())) ||
+      (lead.interestedServices && lead.interestedServices.some(s => getServiceLabel(s).toLowerCase().includes(search.toLowerCase())));
 
     // 2. Status filter
     const matchesStatus = statusFilter === '' || lead.status === statusFilter;
@@ -155,7 +154,12 @@ export const AssignLeadsPage: React.FC = () => {
       (assignmentFilter === 'unassigned' && !lead.assignedTo) ||
       (assignmentFilter === 'assigned' && !!lead.assignedTo);
 
-    return matchesSearch && matchesStatus && matchesAssignment;
+    // 4. Service filter
+    const matchesService =
+      serviceFilter === '' ||
+      (lead.interestedServices && lead.interestedServices.includes(serviceFilter));
+
+    return matchesSearch && matchesStatus && matchesAssignment && matchesService;
   });
 
   return (
@@ -172,23 +176,10 @@ export const AssignLeadsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Notifications */}
-      {successMessage && (
-        <div className="bg-green-50 border border-green-200 text-emerald-700 p-4 rounded-[12px] flex items-center space-x-3 shadow-sm">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-          <p className="text-xs font-semibold">{successMessage}</p>
-        </div>
-      )}
-
-      {errorMessage && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-[12px] flex items-center space-x-3 shadow-sm">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-          <p className="text-xs font-semibold">{errorMessage}</p>
-        </div>
-      )}
+      {/* Messages replaced by global toast */}
 
       {/* Filters Toolbar */}
-      <div className="bg-white rounded-[12px] border border-slate-200 shadow-sm p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+      <div className="bg-white rounded-[12px] border border-slate-200 shadow-sm p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
         {/* Search */}
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -223,9 +214,26 @@ export const AssignLeadsPage: React.FC = () => {
           <option value="">All Statuses</option>
           <option value="NEW">New</option>
           <option value="INCOMPLETE">Incomplete</option>
+          <option value="NOT_PICKED">Not Picked</option>
+          <option value="BUSY">Busy</option>
+          <option value="CONTACTED">Contacted</option>
           <option value="FOLLOW_UP">Follow Up</option>
           <option value="INTERESTED">Interested</option>
           <option value="CONVERTED">Converted</option>
+          <option value="NOT_INTERESTED">Not Interested</option>
+          <option value="INVALID_NUMBER">Invalid Number</option>
+        </select>
+
+        {/* Service filter */}
+        <select
+          value={serviceFilter}
+          onChange={(e) => setServiceFilter(e.target.value)}
+          className="w-full bg-white border border-slate-350 rounded-[8px] py-2 px-3 focus:outline-none focus:ring-1 focus:ring-brand-purple"
+        >
+          <option value="">All Services</option>
+          {SERVICE_CATEGORIES.flatMap(c => c.options).map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
         </select>
 
         {/* Selected count info */}
@@ -307,10 +315,19 @@ export const AssignLeadsPage: React.FC = () => {
                         />
                       </td>
                       <td className="p-4">
-                        <div>
+                        <div className="space-y-1">
                           <p className="font-bold text-slate-900">{lead.displayName}</p>
                           {lead.businessName && lead.businessName !== lead.displayName && (
                             <p className="text-[10px] text-slate-400 truncate max-w-[200px]">{lead.businessName}</p>
+                          )}
+                          {lead.interestedServices && lead.interestedServices.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-0.5 max-w-[200px]">
+                              {lead.interestedServices.map((service, idx) => (
+                                <span key={idx} className="bg-brand-purple/10 text-brand-purple border border-brand-purple/20 text-[9px] font-bold px-1.5 py-0 rounded">
+                                  {getServiceLabel(service)}
+                                </span>
+                              ))}
+                            </div>
                           )}
                         </div>
                       </td>
@@ -330,9 +347,14 @@ export const AssignLeadsPage: React.FC = () => {
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                           lead.status === 'NEW' ? 'bg-blue-100 text-blue-800' :
                           lead.status === 'INCOMPLETE' ? 'bg-red-100 text-red-800' :
+                          lead.status === 'NOT_PICKED' ? 'bg-orange-100 text-orange-800' :
+                          lead.status === 'BUSY' ? 'bg-yellow-100 text-yellow-800' :
+                          lead.status === 'CONTACTED' ? 'bg-teal-100 text-teal-800' :
                           lead.status === 'FOLLOW_UP' ? 'bg-amber-100 text-amber-800' :
                           lead.status === 'INTERESTED' ? 'bg-indigo-100 text-indigo-800' :
                           lead.status === 'CONVERTED' ? 'bg-green-100 text-green-800' :
+                          lead.status === 'NOT_INTERESTED' ? 'bg-slate-100 text-slate-600' :
+                          lead.status === 'INVALID_NUMBER' ? 'bg-rose-100 text-rose-800' :
                           'bg-slate-100 text-slate-800'
                         }`}>
                           {lead.status}

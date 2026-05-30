@@ -160,3 +160,34 @@ body {
   height: 2px !important;
   border-radius: 0 0 12px 12px !important;
 }
+
+/* Toast Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(120px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(60px) scale(0.95);
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slideOut {
+  animation: slideOut 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

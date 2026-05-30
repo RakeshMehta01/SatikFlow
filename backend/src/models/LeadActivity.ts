@@ -20,6 +20,7 @@ export interface ILeadActivity extends Document {
   leadStatus?: string;
   remark?: string;
   nextFollowUpAt?: Date;
+  interestedServices?: string[];
   createdAt: Date;
 }
 
@@ -46,7 +47,8 @@ const leadActivitySchema = new Schema<ILeadActivity>({
   },
   leadStatus: { type: String },
   remark: { type: String, trim: true },
-  nextFollowUpAt: { type: Date }
+  nextFollowUpAt: { type: Date },
+  interestedServices: { type: [String], default: [] }
 }, {
   timestamps: { createdAt: true, updatedAt: false }
 });

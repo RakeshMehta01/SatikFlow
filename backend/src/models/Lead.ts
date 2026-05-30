@@ -38,6 +38,7 @@ export interface ILead extends Document {
   customFields?: Map<string, any>;
   lastActivityAt?: Date;
   nextFollowUpAt?: Date;
+  interestedServices?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -82,7 +83,8 @@ const leadSchema = new Schema<ILead>({
   uploadedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   customFields: { type: Map, of: Schema.Types.Mixed, default: {} },
   lastActivityAt: { type: Date },
-  nextFollowUpAt: { type: Date }
+  nextFollowUpAt: { type: Date },
+  interestedServices: { type: [String], default: [] }
 }, {
   timestamps: true
 });

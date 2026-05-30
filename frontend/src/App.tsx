@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
+import { ToastContainer } from './components/Toast';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -166,6 +167,7 @@ export const App: React.FC = () => {
           {/* Catch-all Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <ToastContainer />
       </AuthProvider>
     </BrowserRouter>
   );

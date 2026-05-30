@@ -6,13 +6,12 @@ import {
   ToggleLeft,
   ToggleRight,
   X,
-  AlertCircle,
-  CheckCircle2,
   Mail,
   Phone,
   Lock
 } from 'lucide-react';
 import usePageTitle from '../hooks/usePageTitle';
+import { toast } from '../components/Toast';
 
 interface AgentUser {
   _id: string;
@@ -28,8 +27,6 @@ export const UsersPage: React.FC = () => {
   usePageTitle('Users & Agents');
   const [users, setUsers] = useState<AgentUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Modal forms
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,12 +46,11 @@ export const UsersPage: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      setErrorMsg(null);
       const res = await api.get('/users');
       setUsers(res.data);
     } catch (error) {
       console.error('Error fetching users:', error);
-      setErrorMsg('Failed to query registered calling agents.');
+      toast.error('Failed to query registered calling agents.');
     } finally {
       setLoading(false);
     }
@@ -66,7 +62,6 @@ export const UsersPage: React.FC = () => {
     setEmail('');
     setPhone('');
     setPassword('');
-    setErrorMsg(null);
     setIsModalOpen(true);
   };
 
@@ -76,15 +71,12 @@ export const UsersPage: React.FC = () => {
     setEmail(user.email);
     setPhone(user.phone || '');
     setPassword(''); // Leave blank unless changing
-    setErrorMsg(null);
     setIsModalOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
 
     try {
       if (editingUser) {
@@ -93,42 +85,39 @@ export const UsersPage: React.FC = () => {
         if (password) payload.password = password; // Only update if filled
         
         await api.put(`/users/${editingUser._id}`, payload);
-        setSuccessMsg(`Successfully updated credentials for agent: ${name}`);
+        toast.success(`Successfully updated credentials for agent: ${name}`);
       } else {
         // Create agent
         if (!password) {
-          setErrorMsg('Password is required for new agents');
+          toast.warning('Password is required for new agents');
           setSubmitting(false);
           return;
         }
         await api.post('/users', { name, email, phone, password, role: 'AGENT' });
-        setSuccessMsg(`Successfully registered new calling agent: ${name}`);
+        toast.success(`Successfully registered new calling agent: ${name}`);
       }
 
       setIsModalOpen(false);
       fetchUsers(); // Refresh table
     } catch (error: any) {
       console.error('Error submitting user:', error);
-      setErrorMsg(error.response?.data?.message || 'Error occurred while saving agent profile');
+      toast.error(error.response?.data?.message || 'Error occurred while saving agent profile');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleToggleStatus = async (user: AgentUser) => {
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    
     try {
       const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
       const res = await api.patch(`/users/${user._id}/status`, { status: newStatus });
       const updatedUser = res.data;
       
-      setSuccessMsg(`Agent status set to: ${updatedUser.status} for ${user.name}`);
+      toast.success(`Agent status set to: ${updatedUser.status} for ${user.name}`);
       fetchUsers(); // Refresh
     } catch (error: any) {
       console.error('Error toggling status:', error);
-      setErrorMsg(error.response?.data?.message || 'Could not update agent status');
+      toast.error(error.response?.data?.message || 'Could not update agent status');
     }
   };
 
@@ -150,20 +139,7 @@ export const UsersPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Notifications */}
-      {successMsg && (
-        <div className="bg-green-50 border border-green-200 text-emerald-700 p-4 rounded-[12px] flex items-center space-x-3 shadow-sm">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-          <p className="text-xs font-semibold">{successMsg}</p>
-        </div>
-      )}
-
-      {errorMsg && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-[12px] flex items-center space-x-3 shadow-sm">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-          <p className="text-xs font-semibold">{errorMsg}</p>
-        </div>
-      )}
+      {/* Messages replaced by global toast */}
 
       {/* Agents Table List */}
       <div className="bg-white rounded-[12px] border border-slate-200 shadow-sm overflow-hidden">

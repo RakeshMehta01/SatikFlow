@@ -6,10 +6,12 @@ import {
   Search,
   Eye,
   Layers,
-  AlertCircle,
   Plus
 } from 'lucide-react';
 import usePageTitle from '../hooks/usePageTitle';
+import { formatDate, formatDateTime } from '../utils/dateFormat';
+import { toast } from '../components/Toast';
+import { getServiceLabel, SERVICE_CATEGORIES } from '../components/MultiSelect';
 
 interface Lead {
   _id: string;
@@ -29,6 +31,7 @@ interface Lead {
   lastActivityAt?: string;
   nextFollowUpAt?: string;
   createdAt: string;
+  interestedServices?: string[];
 }
 
 interface Agent {
@@ -44,7 +47,6 @@ export const LeadListPage: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -52,30 +54,31 @@ export const LeadListPage: React.FC = () => {
   const [agentFilter, setAgentFilter] = useState('');
   const [incompleteFilter, setIncompleteFilter] = useState('false');
   const [followUpFilter, setFollowUpFilter] = useState('');
+  const [serviceFilter, setServiceFilter] = useState('');
 
   useEffect(() => {
     fetchLeads();
     if (user?.role === 'MANAGER') {
       fetchAgents();
     }
-  }, [statusFilter, agentFilter, incompleteFilter, followUpFilter, user]);
+  }, [statusFilter, agentFilter, incompleteFilter, followUpFilter, serviceFilter, user]);
 
   const fetchLeads = async () => {
     try {
       setLoading(true);
-      setError(null);
       
       const params: any = {};
       if (statusFilter) params.status = statusFilter;
       if (agentFilter) params.agentId = agentFilter;
       if (incompleteFilter === 'true') params.incomplete = 'true';
       if (followUpFilter) params.followUpDate = followUpFilter;
+      if (serviceFilter) params.interestedService = serviceFilter;
 
       const res = await api.get('/leads', { params });
       setLeads(res.data);
     } catch (err: any) {
       console.error('Error fetching leads:', err);
-      setError('Could not retrieve leads from CRM directory.');
+      toast.error('Could not retrieve leads from CRM directory.');
     } finally {
       setLoading(false);
     }
@@ -104,7 +107,8 @@ export const LeadListPage: React.FC = () => {
       (lead.customerName && lead.customerName.toLowerCase().includes(term)) ||
       (lead.mobile && lead.mobile.includes(term)) ||
       (lead.city && lead.city.toLowerCase().includes(term)) ||
-      (lead.gmbCategory && lead.gmbCategory.toLowerCase().includes(term))
+      (lead.gmbCategory && lead.gmbCategory.toLowerCase().includes(term)) ||
+      (lead.interestedServices && lead.interestedServices.some(s => getServiceLabel(s).toLowerCase().includes(term)))
     );
   });
 
@@ -134,16 +138,10 @@ export const LeadListPage: React.FC = () => {
         )}
       </div>
 
-      {/* Error Alert */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-[12px] flex items-center space-x-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-          <span className="text-xs font-semibold">{error}</span>
-        </div>
-      )}
+      {/* Messages replaced by global toast */}
 
       {/* Filters Toolbar */}
-      <div className="bg-white rounded-[12px] border border-slate-200 shadow-sm p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+      <div className="bg-white rounded-[12px] border border-slate-200 shadow-sm p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
         {/* Search */}
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -177,6 +175,18 @@ export const LeadListPage: React.FC = () => {
           <option value="INVALID_NUMBER">Invalid Number</option>
         </select>
 
+        {/* Service filter */}
+        <select
+          value={serviceFilter}
+          onChange={(e) => setServiceFilter(e.target.value)}
+          className="w-full bg-white border border-slate-350 rounded-[8px] py-2 px-3 focus:outline-none focus:ring-1 focus:ring-brand-purple"
+        >
+          <option value="">All Services</option>
+          {SERVICE_CATEGORIES.flatMap(c => c.options).map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+
         {/* Manager-only: Agent Filter */}
         {user?.role === 'MANAGER' ? (
           <select
@@ -190,7 +200,7 @@ export const LeadListPage: React.FC = () => {
             ))}
           </select>
         ) : (
-          <div className="w-4 hidden lg:block"></div>
+          <div className="hidden lg:block w-full"></div>
         )}
 
         {/* Incomplete filter */}
@@ -241,10 +251,19 @@ export const LeadListPage: React.FC = () => {
                 {filteredLeads.map((lead) => (
                   <tr key={lead._id} className="hover:bg-slate-50 transition-colors">
                     <td className="p-4">
-                      <div>
+                      <div className="space-y-1">
                         <p className="font-bold text-slate-900">{lead.displayName}</p>
                         {lead.businessName && lead.businessName !== lead.displayName && (
                           <p className="text-[10px] text-slate-400 truncate max-w-[150px]">{lead.businessName}</p>
+                        )}
+                        {lead.interestedServices && lead.interestedServices.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-0.5 max-w-[200px]">
+                            {lead.interestedServices.map((service, idx) => (
+                              <span key={idx} className="bg-brand-purple/10 text-brand-purple border border-brand-purple/20 text-[9px] font-bold px-1.5 py-0 rounded">
+                                {getServiceLabel(service)}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </div>
                     </td>
@@ -271,27 +290,28 @@ export const LeadListPage: React.FC = () => {
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                         lead.status === 'NEW' ? 'bg-blue-100 text-blue-800' :
                         lead.status === 'INCOMPLETE' ? 'bg-red-100 text-red-800' :
+                        lead.status === 'NOT_PICKED' ? 'bg-orange-100 text-orange-800' :
+                        lead.status === 'BUSY' ? 'bg-yellow-100 text-yellow-800' :
+                        lead.status === 'CONTACTED' ? 'bg-teal-100 text-teal-800' :
                         lead.status === 'FOLLOW_UP' ? 'bg-amber-100 text-amber-800' :
                         lead.status === 'INTERESTED' ? 'bg-indigo-100 text-indigo-800' :
                         lead.status === 'CONVERTED' ? 'bg-green-100 text-green-800' :
+                        lead.status === 'NOT_INTERESTED' ? 'bg-slate-100 text-slate-600' :
+                        lead.status === 'INVALID_NUMBER' ? 'bg-rose-100 text-rose-800' :
                         'bg-slate-100 text-slate-800'
                       }`}>
                         {lead.status}
                       </span>
                     </td>
                     <td className="p-4 text-slate-500">
-                      {lead.lastActivityAt
-                        ? new Date(lead.lastActivityAt).toLocaleDateString()
-                        : '—'}
+                      {lead.lastActivityAt ? formatDate(lead.lastActivityAt) : '—'}
                     </td>
                     <td className="p-4 text-slate-500">
                       {lead.nextFollowUpAt ? (
                         <span className="text-amber-700 font-medium">
-                          {new Date(lead.nextFollowUpAt).toLocaleDateString()} {new Date(lead.nextFollowUpAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {formatDateTime(lead.nextFollowUpAt)}
                         </span>
-                      ) : (
-                        '—'
-                      )}
+                      ) : '—'}
                     </td>
                     <td className="p-4 text-center">
                       <Link

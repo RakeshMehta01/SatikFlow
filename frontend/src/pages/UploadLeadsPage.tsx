@@ -6,11 +6,12 @@ import {
   ArrowRight,
   ArrowLeft,
   CheckCircle,
-  AlertCircle,
   Table,
   Check
 } from 'lucide-react';
 import usePageTitle from '../hooks/usePageTitle';
+import { formatDateTime } from '../utils/dateFormat';
+import { toast } from '../components/Toast';
 
 interface UploadHistoryItem {
   _id: string;
@@ -53,7 +54,7 @@ export const UploadLeadsPage: React.FC = () => {
     incomplete: number;
     duplicate: number;
   } | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   
   // History logs
   const [history, setHistory] = useState<UploadHistoryItem[]>([]);
@@ -99,18 +100,16 @@ export const UploadLeadsPage: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
-      setErrorMessage(null);
     }
   };
 
   const handleParse = async () => {
     if (!file) {
-      setErrorMessage('Please select a CSV, Excel, or Numbers file first');
+      toast.warning('Please select a CSV, Excel, or Numbers file first');
       return;
     }
 
     setIsParsing(true);
-    setErrorMessage(null);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -160,7 +159,7 @@ export const UploadLeadsPage: React.FC = () => {
       setStep(2);
     } catch (error: any) {
       console.error('Error parsing file:', error);
-      setErrorMessage(error.response?.data?.message || 'Could not parse the file. Verify that the format is valid.');
+      toast.error(error.response?.data?.message || 'Could not parse the file. Verify that the format is valid.');
     } finally {
       setIsParsing(false);
     }
@@ -175,7 +174,6 @@ export const UploadLeadsPage: React.FC = () => {
 
   const handleImport = async () => {
     setIsImporting(true);
-    setErrorMessage(null);
 
     try {
       const res = await api.post('/uploads/import', {
@@ -186,11 +184,12 @@ export const UploadLeadsPage: React.FC = () => {
       });
 
       setImportSummary(res.data.summary);
+      toast.success('Leads import completed successfully');
       setStep(3);
       fetchUploadHistory(); // Refresh history log
     } catch (error: any) {
       console.error('Error importing leads:', error);
-      setErrorMessage(error.response?.data?.message || 'Server error during lead import');
+      toast.error(error.response?.data?.message || 'Server error during lead import');
     } finally {
       setIsImporting(false);
     }
@@ -204,7 +203,6 @@ export const UploadLeadsPage: React.FC = () => {
     setAllRows([]);
     setMappings({});
     setImportSummary(null);
-    setErrorMessage(null);
     setStep(1);
   };
 
@@ -216,13 +214,7 @@ export const UploadLeadsPage: React.FC = () => {
         <p className="text-xs text-slate-500 mt-0.5">Upload, map and parse Excel, CSV, or other files directly into active lead pools.</p>
       </div>
 
-      {/* Main Error */}
-      {errorMessage && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-[12px] flex items-center space-x-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-          <p className="text-xs font-semibold">{errorMessage}</p>
-        </div>
-      )}
+      {/* Messages replaced by global toast */}
 
       {/* Step Progress Bar */}
       <div className="bg-white p-4 rounded-[12px] border border-slate-200 shadow-sm flex items-center justify-between text-xs sm:text-sm font-semibold max-w-xl">
@@ -482,7 +474,7 @@ export const UploadLeadsPage: React.FC = () => {
                     <td className="p-4 text-center font-bold text-amber-500">{item.duplicateRows}</td>
                     <td className="p-4 text-slate-500">{item.uploadedBy?.name || 'Manager'}</td>
                     <td className="p-4 text-slate-500">
-                      {new Date(item.createdAt).toLocaleDateString()} {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {formatDateTime(item.createdAt)}
                     </td>
                   </tr>
                 ))}

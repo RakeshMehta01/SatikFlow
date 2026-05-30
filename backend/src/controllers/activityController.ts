@@ -5,7 +5,10 @@ import { AuthRequest } from '../middlewares/auth';
 
 export const createActivity = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { leadId, activityType, callStatus, leadStatus, remark, nextFollowUpAt } = req.body;
+    const { leadId, activityType, status, callStatus, leadStatus, remark, nextFollowUpAt, interestedServices } = req.body;
+
+    // Resolve whichever status field was sent
+    const resolvedStatus = status || leadStatus;
 
     if (!leadId || !activityType) {
       res.status(400).json({ message: 'Lead ID and Activity Type are required' });
@@ -24,23 +27,25 @@ export const createActivity = async (req: AuthRequest, res: Response): Promise<v
       return;
     }
 
-    // Create activity record
     const activity = await LeadActivity.create({
       leadId,
       userId: req.user?._id,
       activityType,
       callStatus,
-      leadStatus,
+      leadStatus: resolvedStatus,
       remark,
-      nextFollowUpAt: nextFollowUpAt ? new Date(nextFollowUpAt) : undefined
+      nextFollowUpAt: nextFollowUpAt ? new Date(nextFollowUpAt) : undefined,
+      interestedServices
     });
 
-    // Update Lead state
-    if (leadStatus) {
-      lead.status = leadStatus;
+    if (resolvedStatus) {
+      lead.status = resolvedStatus;
     }
     if (nextFollowUpAt !== undefined) {
       lead.nextFollowUpAt = nextFollowUpAt ? new Date(nextFollowUpAt) : undefined;
+    }
+    if (interestedServices !== undefined) {
+      lead.interestedServices = interestedServices;
     }
     lead.lastActivityAt = new Date();
     await lead.save();
